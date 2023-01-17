@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { ClientProxyFactory, Transport } from '@nestjs/microservices';
-import { LoggerModule } from '../logger/logger.module';
+import { LoggerModule } from '@app/core/logger/logger.module';
 import redisConfig, { REDIS_CONFIG_KEY } from './config/redis.config';
 import { RedisService } from './services/redis.service';
 
