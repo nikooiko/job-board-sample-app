@@ -45,6 +45,15 @@
       "compilerOptions": {
         "tsConfigPath": "libs/core/tsconfig.lib.json"
       }
+    },
+    "extra": {
+      "type": "library",
+      "root": "libs/extra",
+      "entryFile": "index",
+      "sourceRoot": "libs/extra/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/extra/tsconfig.lib.json"
+      }
     }
   }
 }

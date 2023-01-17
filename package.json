@@ -85,7 +85,8 @@
       "<rootDir>/libs/"
     ],
     "moduleNameMapper": {
-      "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1"
+      "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1",
+      "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1"
     }
   }
 }

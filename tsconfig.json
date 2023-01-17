@@ -24,6 +24,12 @@
       ],
       "@app/core/*": [
         "libs/core/src/*"
+      ],
+      "@app/extra": [
+        "libs/extra/src"
+      ],
+      "@app/extra/*": [
+        "libs/extra/src/*"
       ]
     }
   }
