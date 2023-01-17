@@ -29,10 +29,12 @@
     "@nestjs/microservices": "^9.2.1",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/swagger": "^6.1.4",
+    "@nestjs/throttler": "^3.1.0",
     "class-validator": "^0.14.0",
     "cookie-parser": "^1.4.6",
     "helmet": "^6.0.1",
     "ioredis": "^5.2.5",
+    "nestjs-throttler-storage-redis": "^0.2.2",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "winston": "^3.8.2"
