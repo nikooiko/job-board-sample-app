@@ -30,12 +30,6 @@
       ],
       "@app/extra/*": [
         "libs/extra/src/*"
-      ],
-      "@app/jobs-lib": [
-        "libs/jobs-lib/src"
-      ],
-      "@app/jobs-lib/*": [
-        "libs/jobs-lib/src/*"
       ]
     }
   }

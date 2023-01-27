@@ -21,7 +21,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/${SERVICE_NAME:-gateway}/test/jest-e2e.json",
-    "prisma": "cd libs/${SERVICE_NAME:-jobs}-lib/src/${SERVICE_NAME:-jobs}-prisma && prisma"
+    "prisma": "cd apps/${SERVICE_NAME:-jobs}/src/${SERVICE_NAME:-jobs}-prisma && prisma"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
@@ -89,8 +89,7 @@
     ],
     "moduleNameMapper": {
       "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1",
-      "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1",
-      "^@app/jobs-lib(|/.*)$": "<rootDir>/libs/jobs-lib/src/$1"
+      "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1"
     }
   }
 }

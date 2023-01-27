@@ -54,15 +54,6 @@
       "compilerOptions": {
         "tsConfigPath": "libs/extra/tsconfig.lib.json"
       }
-    },
-    "jobs-lib": {
-      "type": "library",
-      "root": "libs/jobs-lib",
-      "entryFile": "index",
-      "sourceRoot": "libs/jobs-lib/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/jobs-lib/tsconfig.lib.json"
-      }
     }
   }
 }
