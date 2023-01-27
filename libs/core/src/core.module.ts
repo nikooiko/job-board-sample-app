@@ -4,6 +4,7 @@ import { LoggerModule } from './logger/logger.module';
 import { SecurityModule } from './security/security.module';
 import { ErrorHandlingModule } from './error-handling/error-handling.module';
 import { CookiesModule } from './cookies/cookies.module';
+import { ValidationModule } from './validation/validation.module';
 
 @Module({
   imports: [
@@ -15,4 +16,4 @@ import { CookiesModule } from './cookies/cookies.module';
     CookiesModule,
   ],
 })
-export class ValidationModule {}
+export class CoreModule {}
