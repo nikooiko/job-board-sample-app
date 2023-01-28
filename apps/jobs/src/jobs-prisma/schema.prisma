@@ -1,13 +1,27 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["extendedWhereUnique"]
-  output   = "../../../../node_modules/@app/jobs/prisma-client"
+  output          = "../../../../node_modules/@app/jobs/prisma-client"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model JobPost {
+  id             Int            @id @default(autoincrement())
+  title          String
+  description    String
+  salary         Int
+  employmentType EmploymentType @map("employment_type")
+
+  @@map("job_posts")
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+
+  @@map("employment_type")
 }
