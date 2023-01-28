@@ -67,7 +67,7 @@ export const prettyConsoleFormatter = winston.format(
     const finalMessage = levelColor(message);
     knownMeta.forEach((meta) => delete info[meta]);
     info[
-      MESSAGE.toString()
+      MESSAGE as any
     ] = `${prefix} ${timestamp} ${levelStr} ${traceInfo} ${finalMessage} ${
       !!Object.keys(rest).length ? `(${JSON.stringify(rest)})` : ''
     }`;
