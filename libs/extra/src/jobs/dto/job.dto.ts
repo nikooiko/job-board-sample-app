@@ -1,8 +1,8 @@
-import { EmploymentType, JobPost } from '@app/jobs/prisma-client';
+import { EmploymentType, Job } from '@app/jobs/prisma-client';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsPositive, IsString } from 'class-validator';
 
-export class JobDto implements JobPost {
+export class JobDto implements Job {
   @ApiProperty()
   @IsPositive()
   id: number;

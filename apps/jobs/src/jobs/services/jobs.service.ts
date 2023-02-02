@@ -13,8 +13,8 @@ export class JobsService {
     @Inject(LOGGER) private logger: Logger,
   ) {}
 
-  async create(data: Prisma.JobPostCreateInput): Promise<JobDto> {
-    const job = await this.prisma.jobPost.create({
+  async create(data: Prisma.JobCreateInput): Promise<JobDto> {
+    const job = await this.prisma.job.create({
       data,
     });
     this.logger.info('Created job', { type: 'JOB_CREATED', id: job.id, data });
@@ -25,21 +25,21 @@ export class JobsService {
     params: {
       skip?: number;
       take?: number;
-      cursor?: Prisma.JobPostWhereUniqueInput;
-      where?: Prisma.JobPostWhereInput;
-      orderBy?: Prisma.JobPostOrderByWithRelationInput;
+      cursor?: Prisma.JobWhereUniqueInput;
+      where?: Prisma.JobWhereInput;
+      orderBy?: Prisma.JobOrderByWithRelationInput;
     } = {},
   ): Promise<ListJobDto> {
     const { skip, take = 10, cursor, where, orderBy } = params;
     const [items, count] = await this.prisma.$transaction([
-      this.prisma.jobPost.findMany({
+      this.prisma.job.findMany({
         skip,
         take,
         cursor,
         where,
         orderBy,
       }),
-      this.prisma.jobPost.count({ where }),
+      this.prisma.job.count({ where }),
     ]);
     return {
       items,
@@ -49,8 +49,8 @@ export class JobsService {
     };
   }
 
-  async findOne(where: Prisma.JobPostWhereUniqueInput): Promise<JobDto> {
-    return this.prisma.jobPost.findUniqueOrThrow({
+  async findOne(where: Prisma.JobWhereUniqueInput): Promise<JobDto> {
+    return this.prisma.job.findUniqueOrThrow({
       where,
     });
   }
@@ -59,10 +59,10 @@ export class JobsService {
     where,
     data,
   }: {
-    where: Prisma.JobPostWhereUniqueInput;
-    data: Prisma.JobPostUpdateInput;
+    where: Prisma.JobWhereUniqueInput;
+    data: Prisma.JobUpdateInput;
   }): Promise<JobDto> {
-    const job = await this.prisma.jobPost.update({
+    const job = await this.prisma.job.update({
       data,
       where,
     });
@@ -70,8 +70,8 @@ export class JobsService {
     return job;
   }
 
-  async remove(where: Prisma.JobPostWhereUniqueInput): Promise<JobDto> {
-    const job = await this.prisma.jobPost.delete({
+  async remove(where: Prisma.JobWhereUniqueInput): Promise<JobDto> {
+    const job = await this.prisma.job.delete({
       where,
     });
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
