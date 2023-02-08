@@ -31,7 +31,7 @@ export class JobsService {
     } = {},
   ): Promise<ListJobDto> {
     const { skip, take = 10, cursor, where, orderBy } = params;
-    const [items, count] = await this.prisma.$transaction([
+    const [items, count] = await Promise.all([
       this.prisma.job.findMany({
         skip,
         take,

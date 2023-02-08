@@ -16,12 +16,14 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JobsService } from '../services/jobs.service';
 import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { FindAllJobsQueryDto } from '@app/extra/jobs/dto/find-all-jobs-query.dto';
 
+@ApiTags('Jobs')
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
