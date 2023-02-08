@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -54,7 +55,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
-  findOne(@Param('id') id: number): Promise<JobDto> {
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.findOne({ id });
   }
 
@@ -64,7 +65,10 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
-  update(@Param('id') id: number, @Body() data: PatchJobDto): Promise<JobDto> {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: PatchJobDto,
+  ): Promise<JobDto> {
     return this.jobsService.update({
       where: { id },
       data,
@@ -77,7 +81,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
-  remove(@Param('id') id: number): Promise<JobDto> {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.remove({ id });
   }
 }
