@@ -18,7 +18,7 @@ export class JobsService {
     private readonly config: ConfigType<typeof jobsConfig>,
     private readonly httpService: HttpService,
   ) {
-    this.apiUrl = `${config.rootUrl}/private/api/v1/jobs`;
+    this.apiUrl = `${config.rootUrl}/jobs`;
   }
 
   async create(data: CreateJobDto): Promise<JobDto> {

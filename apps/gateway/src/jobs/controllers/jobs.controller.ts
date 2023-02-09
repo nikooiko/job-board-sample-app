@@ -15,6 +15,7 @@ import { JobDto } from '@app/extra/jobs/dto/job.dto';
 import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
 import {
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -44,6 +45,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: ListJobDto })
   @ApiAppBadRequestResponse()
+  @ApiNotFoundResponse()
   findAll(@Query() query: FindAllJobsQueryDto): Promise<ListJobDto> {
     return this.jobsService.findAll(query);
   }
@@ -54,6 +56,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiNotFoundResponse()
   findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.findOne(id);
   }
@@ -64,6 +67,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiNotFoundResponse()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PatchJobDto,
@@ -77,6 +81,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiNotFoundResponse()
   remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.remove(id);
   }

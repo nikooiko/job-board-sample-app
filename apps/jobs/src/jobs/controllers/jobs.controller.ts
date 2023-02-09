@@ -22,6 +22,7 @@ import { JobsService } from '../services/jobs.service';
 import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { FindAllJobsQueryDto } from '@app/extra/jobs/dto/find-all-jobs-query.dto';
+import { ApiAppNotFoundResponse } from '@app/core/error-handling/decorators/api-app-not-found-response.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -57,6 +58,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiAppNotFoundResponse()
   findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.findOne({ id });
   }
@@ -67,6 +69,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiAppNotFoundResponse()
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PatchJobDto,
@@ -83,6 +86,7 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
+  @ApiAppNotFoundResponse()
   remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
     return this.jobsService.remove({ id });
   }
