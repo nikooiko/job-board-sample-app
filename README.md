@@ -14,6 +14,14 @@ nvm use # loads and uses saved nodejs version
 npm install # installs nodejs packages
 ```
 
+## Setup Dev Environment
+
+Copy example .env
+
+```bash
+cp .env.example .env
+```
+
 ## Running the app
 
 ```bash
