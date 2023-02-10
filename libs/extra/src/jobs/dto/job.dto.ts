@@ -1,10 +1,11 @@
 import { EmploymentType, Job } from '@app/jobs/prisma-client';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsPositive, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsPositive, IsString, Min } from 'class-validator';
 
 export class JobDto implements Job {
   @ApiProperty()
-  @IsPositive()
+  @IsNumber()
+  @Min(0)
   id: number;
   @ApiProperty()
   @IsString()
@@ -12,7 +13,7 @@ export class JobDto implements Job {
   @ApiProperty()
   @IsString()
   description: string;
-  @ApiProperty()
+  @ApiProperty({ default: 100 })
   @IsPositive()
   salary: number;
   @ApiProperty({ enum: EmploymentType })
