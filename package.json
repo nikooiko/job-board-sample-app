@@ -24,6 +24,7 @@
     "prisma": "cd apps/${SERVICE_NAME:-jobs}/src/${SERVICE_NAME:-jobs}-prisma && prisma"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.6.0",
     "@nestjs/axios": "^1.0.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
