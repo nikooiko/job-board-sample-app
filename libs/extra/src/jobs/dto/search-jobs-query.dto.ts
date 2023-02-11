@@ -1,7 +1,7 @@
 import { LimitParam } from '@app/core/pagination/decorators/limit-param.decorator';
 import { PageParam } from '@app/core/pagination/decorators/page-param.decorator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsPositive, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsPositive, IsString } from 'class-validator';
 import { EmploymentType } from '@app/jobs/prisma-client';
 import { IsGreaterThan } from '@app/core/api/decorators/is-greater-than.decorator';
 
@@ -14,20 +14,22 @@ export class SearchJobsQueryDto {
 
   @ApiPropertyOptional()
   @IsString()
+  @IsOptional()
   searchText?: string;
 
   @ApiPropertyOptional({ enum: EmploymentType })
   @IsEnum(EmploymentType)
+  @IsOptional()
   employmentType?: EmploymentType;
 
   @ApiPropertyOptional()
   @IsPositive()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @IsOptional()
   salaryFrom?: number;
 
   @ApiPropertyOptional()
   @IsPositive()
-  @IsNumber({ allowNaN: false, allowInfinity: false })
   @IsGreaterThan('salaryFrom')
+  @IsOptional()
   salaryTo?: number;
 }
