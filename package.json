@@ -94,7 +94,8 @@
     ],
     "moduleNameMapper": {
       "^@app/core(|/.*)$": "<rootDir>/libs/core/src/$1",
-      "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1"
+      "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1",
+      "^@app/testing(|/.*)$": "<rootDir>/libs/testing/src/$1"
     }
   }
 }
