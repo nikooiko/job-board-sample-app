@@ -4,10 +4,10 @@ export const jobsIndex: IndicesCreateRequest = {
   index: 'jobs',
   mappings: {
     properties: {
-      title: { type: 'text' },
-      description: { type: 'text' },
+      title: { type: 'text', analyzer: 'english' },
+      description: { type: 'text', analyzer: 'english' },
       salary: { type: 'integer' },
-      employment_type: { type: 'constant_keyword' },
+      employment_type: { type: 'keyword' },
     },
   },
 };

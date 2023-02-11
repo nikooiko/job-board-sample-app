@@ -10,6 +10,9 @@ import { AppBadRequestException } from '@app/core/error-handling/exceptions/app-
 import { ResponseError } from '@elastic/transport/lib/errors';
 import { AppNotFoundException } from '@app/core/error-handling/exceptions/app-not-found.exception';
 import { jobsIndex } from '../indices/jobs.index';
+import { dtoToSearchConverter } from '../converters/dto-to-search.converter';
+import { SearchJobDoc } from '../interfaces/search-job-doc.interface';
+import { searchToDtoConverter } from '../converters/search-to-dto.converter';
 
 @Injectable()
 export class JobsService {
@@ -23,11 +26,48 @@ export class JobsService {
   }
 
   async search(params: SearchJobsQueryDto): Promise<ListJobDto> {
-    const { page, limit } = params;
+    const { page, limit, searchText, employmentType, salaryFrom, salaryTo } =
+      params;
+    const filter: QueryDslQueryContainer[] = [];
+    if (searchText) {
+      filter.push({
+        multi_match: {
+          query: searchText,
+          fields: ['title', 'description'],
+        },
+      });
+    }
+    if (employmentType) {
+      filter.push({
+        term: {
+          employment_type: employmentType,
+        },
+      });
+    }
+    if (salaryFrom) {
+      filter.push({
+        range: {
+          salary: {
+            gte: salaryFrom,
+          },
+        },
+      });
+    }
+    if (salaryTo) {
+      filter.push({
+        range: {
+          salary: {
+            lte: salaryTo,
+          },
+        },
+      });
+    }
     const query: QueryDslQueryContainer = {
-      match_all: {},
+      bool: {
+        filter,
+      },
     };
-    const { hits } = await this.elasticsearchService.search<JobDto>({
+    const { hits } = await this.elasticsearchService.search<SearchJobDoc>({
       index: jobsIndex.index,
       query,
       from: page * limit,
@@ -40,9 +80,12 @@ export class JobsService {
       type: 'SEARCH_JOB_RESULTS',
       hits,
       params,
+      query,
     });
     return {
-      items: hits.hits.map((hit) => hit._source as JobDto),
+      items: hits.hits.map((hit) =>
+        searchToDtoConverter(hit._source as SearchJobDoc),
+      ),
       limit,
       count,
       pages: Math.ceil(count / limit),
@@ -53,7 +96,7 @@ export class JobsService {
     await this.elasticsearchService.index({
       index: jobsIndex.index,
       id: job.id.toString(),
-      document: job,
+      document: dtoToSearchConverter(job),
     });
     this.logger.info('Upsert job', { type: 'SEARCH_JOB_UPSERT', job });
   }
