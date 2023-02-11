@@ -97,5 +97,8 @@
       "^@app/extra(|/.*)$": "<rootDir>/libs/extra/src/$1",
       "^@app/testing(|/.*)$": "<rootDir>/libs/testing/src/$1"
     }
+  },
+  "prisma": {
+    "seed": "node -r ts-node/register -r tsconfig-paths/register seed.ts"
   }
 }
