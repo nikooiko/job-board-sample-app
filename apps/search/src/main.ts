@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useLogger(app.get(NestJSLoggerService));
   const version = 1;
   const port = 4001;
-  const apiPath = `private/api/v${version}/search`;
+  const apiPath = `private/api/v${version}/search-svc`;
   app.setGlobalPrefix(apiPath);
   const config = new DocumentBuilder()
     .setTitle('Search SVC API')
