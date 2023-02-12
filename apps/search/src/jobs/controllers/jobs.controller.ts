@@ -8,8 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import {
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -20,7 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { JobsService } from '../services/jobs.service';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
-import { SearchJobsQueryDto } from '@app/extra/jobs/dto/search-jobs-query.dto';
+import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -33,7 +33,7 @@ export class JobsController {
   })
   @ApiCreatedResponse()
   @ApiAppBadRequestResponse()
-  upsert(@Body() data: JobDto): Promise<void> {
+  upsert(@Body() data: JobDto): Promise<string> {
     return this.jobsService.upsert(data);
   }
 

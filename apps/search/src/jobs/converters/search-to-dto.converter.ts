@@ -1,4 +1,4 @@
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { SearchJobDoc } from '../interfaces/search-job-doc.interface';
 
 export const searchToDtoConverter = (doc: SearchJobDoc): JobDto => {

@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { ElasticsearchService } from '@app/extra/elasticsearch/services/elasticsearch.service';
-import { SearchJobsQueryDto } from '@app/extra/jobs/dto/search-jobs-query.dto';
+import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AppBadRequestException } from '@app/core/error-handling/exceptions/app-bad-request.exception';
 import { ResponseError } from '@elastic/transport/lib/errors';
@@ -92,13 +92,14 @@ export class JobsService {
     };
   }
 
-  async upsert(job: JobDto): Promise<void> {
+  async upsert(job: JobDto): Promise<string> {
     await this.elasticsearchService.index({
       index: jobsIndex.index,
       id: job.id.toString(),
       document: dtoToSearchConverter(job),
     });
     this.logger.info('Upsert job', { type: 'SEARCH_JOB_UPSERT', job });
+    return jobsIndex.index;
   }
 
   async remove(id: number): Promise<void> {

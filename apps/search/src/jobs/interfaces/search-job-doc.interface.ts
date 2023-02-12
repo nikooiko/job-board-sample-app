@@ -6,4 +6,6 @@ export interface SearchJobDoc {
   description: string;
   salary: number;
   employment_type: EmploymentType;
+  searchIndex: string | null;
+  searchableSince: Date | null;
 }
