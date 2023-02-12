@@ -1,21 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { CreateJobDto } from '@app/extra/jobs/dto/create-job.dto';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
-import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
-import jobsConfig from '../config/jobs.config';
+import { CreateJobDto } from '@app/extra/svc-jobs/dto/create-job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { PatchJobDto } from '@app/extra/svc-jobs/dto/patch-job.dto';
 import { ConfigType } from '@nestjs/config';
 import { wrapSvcRequest } from '@app/core/api/utils/wrap-svc-request.util';
-import { FindAllJobsQueryDto } from '@app/extra/jobs/dto/find-all-jobs-query.dto';
+import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
+import svcJobsConfig from '../config/svc-jobs.config';
 
 @Injectable()
-export class JobsService {
+export class SvcJobsService {
   public apiUrl: string;
 
   constructor(
-    @Inject(jobsConfig.KEY)
-    private readonly config: ConfigType<typeof jobsConfig>,
+    @Inject(svcJobsConfig.KEY)
+    private readonly config: ConfigType<typeof svcJobsConfig>,
     private readonly httpService: HttpService,
   ) {
     this.apiUrl = `${config.rootUrl}/jobs`;

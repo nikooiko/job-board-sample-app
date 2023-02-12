@@ -1,4 +1,4 @@
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { PagedListDto } from '@app/core/pagination/dto/paged-list.dto';
 import { ApiProperty } from '@nestjs/swagger';
 
