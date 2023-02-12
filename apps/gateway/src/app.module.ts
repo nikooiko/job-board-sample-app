@@ -3,14 +3,14 @@ import { CoreModule } from '@app/core/core.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { JobsModule } from './jobs/jobs.module';
+import { JobsSearchModule } from './jobs-search/jobs-search.module';
 
 @Module({
   imports: [
     CoreModule /* must be imported before other modules as it applies some security-related middleware */,
     JobsModule,
+    JobsSearchModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule implements OnApplicationBootstrap {
   constructor(@Inject(LOGGER) private logger: Logger) {}
