@@ -1,18 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { JobsController } from './jobs.controller';
-import { JobsService } from '../services/jobs.service';
+import { SvcJobsService } from '@app/extra/svc-jobs/services/svc-jobs.service';
 import { mockDeep } from 'jest-mock-extended';
+import { JobsController } from './jobs.controller';
 
 describe('JobsController', () => {
   let controller: JobsController;
-  const mockJobsService = mockDeep<JobsService>();
+  const mockJobsService = mockDeep<SvcJobsService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [JobsController],
-      providers: [JobsService],
+      providers: [SvcJobsService],
     })
-      .overrideProvider(JobsService)
+      .overrideProvider(SvcJobsService)
       .useValue(mockJobsService)
       .compile();
 

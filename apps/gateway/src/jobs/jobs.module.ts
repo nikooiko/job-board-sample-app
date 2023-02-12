@@ -1,13 +1,10 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
-import { ConfigModule } from '@nestjs/config';
-import { JobsService } from './services/jobs.service';
+import { SvcJobsModule } from '@app/extra/svc-jobs/svc-jobs.module';
 import { JobsController } from './controllers/jobs.controller';
-import jobsConfig from './config/jobs.config';
 
 @Module({
-  imports: [ConfigModule.forFeature(jobsConfig), HttpModule],
+  imports: [SvcJobsModule],
   controllers: [JobsController],
-  providers: [JobsService],
+  providers: [],
 })
 export class JobsModule {}

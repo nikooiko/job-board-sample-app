@@ -9,10 +9,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CreateJobDto } from '@app/extra/jobs/dto/create-job.dto';
-import { JobsService } from '../services/jobs.service';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
-import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
+import { CreateJobDto } from '@app/extra/svc-jobs/dto/create-job.dto';
+import { SvcJobsService } from '@app/extra/svc-jobs/services/svc-jobs.service';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
+import { PatchJobDto } from '@app/extra/svc-jobs/dto/patch-job.dto';
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -20,14 +20,14 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
-import { FindAllJobsQueryDto } from '@app/extra/jobs/dto/find-all-jobs-query.dto';
+import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
 export class JobsController {
-  constructor(private readonly jobsService: JobsService) {}
+  constructor(private readonly jobsService: SvcJobsService) {}
 
   @Post()
   @ApiOperation({
