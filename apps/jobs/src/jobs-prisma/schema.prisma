@@ -10,11 +10,13 @@ datasource db {
 }
 
 model Job {
-  id             Int            @id @default(autoincrement())
-  title          String
-  description    String
-  salary         Int
-  employmentType EmploymentType @map("employment_type")
+  id              Int            @id @default(autoincrement())
+  title           String
+  description     String
+  salary          Int
+  searchIndex     String?        @map("search_index")
+  searchableSince DateTime?      @map("searchable_since") @db.Timestamptz(6)
+  employmentType  EmploymentType @map("employment_type")
 
   @@map("jobs")
 }
