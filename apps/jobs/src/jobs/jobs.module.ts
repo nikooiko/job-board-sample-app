@@ -18,6 +18,7 @@ export class JobsModule implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
+    await this.jobsService.init(); // always resolves
     this.logger.info('Jobs bootstrap success!', {
       type: 'JOBS_BOOTSTRAP',
     });

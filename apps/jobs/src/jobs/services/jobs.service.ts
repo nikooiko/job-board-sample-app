@@ -9,11 +9,20 @@ import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.serv
 
 @Injectable()
 export class JobsService {
+  static PARALLEL_UPLOAD_LIMIT = 10;
+
   constructor(
     private prisma: JobsPrismaService,
     @Inject(LOGGER) private logger: Logger,
     private svcSearchService: SvcSearchService,
   ) {}
+
+  async init() {
+    // sync jobs with search at next tick for more graceful startup
+    setImmediate(async () => {
+      await this.syncJobsWithSearch(); // always resolves
+    });
+  }
 
   async create(data: Prisma.JobCreateInput): Promise<JobDto> {
     const job = await this.prisma.job.create({
@@ -99,19 +108,22 @@ export class JobsService {
       if (!data) {
         data = await this.findOne({ id: id });
       }
-      const searchIndex = await this.svcSearchService.upsertJob(data);
+      const { searchIndex, searchableSince } =
+        await this.svcSearchService.upsertJob(data);
       await this.update(
         {
           where: { id: data.id },
           data: {
             searchIndex,
-            searchableSince: new Date(),
+            searchableSince,
           },
         },
         false,
       );
       this.logger.info('Added job to search index', {
         type: 'SEARCH_UPLOAD_JOB_SUCCESS',
+        searchIndex,
+        searchableSince,
         id,
         data,
       });
@@ -160,5 +172,65 @@ export class JobsService {
       });
     }
     return true;
+  }
+
+  async syncJobsWithSearch(): Promise<void> {
+    const take = JobsService.PARALLEL_UPLOAD_LIMIT;
+    const fetchedSet = new Set();
+    const indexName = await this.svcSearchService.indexName();
+    let updated = 0;
+    let fetched = 0;
+    let iterations = 0;
+    try {
+      while (true) {
+        const { items: jobPosts } = await this.findAll({
+          where: {
+            OR: [
+              {
+                searchIndex: {
+                  not: {
+                    equals: indexName,
+                  },
+                },
+              },
+              {
+                searchIndex: {
+                  equals: null,
+                },
+              },
+            ],
+          },
+          take,
+        });
+        jobPosts.forEach(({ id }: JobDto) => fetchedSet.add(id));
+        const newFetched = fetchedSet.size;
+        if (newFetched === fetched) {
+          // this is a failsafe mechanism, in case something goes wrong with the synchronization, to avoid infinite loops
+          break;
+        }
+        fetched = newFetched;
+        iterations++;
+        // TODO: create bulk upload method (not one by one as now)
+        for (const jobPost of jobPosts) {
+          await this.tryUploadToSearch(jobPost.id, jobPost);
+          updated++;
+        }
+      }
+    } catch (err) {
+      this.logger.error('Upload job posts to search failed!', {
+        type: 'SYNC_JOBS_WITH_SEARCH_FAILURE',
+        err,
+        iterations,
+        fetched,
+        updated,
+      });
+      return;
+    }
+    this.logger.info('Synced jobs search successfully', {
+      type: 'SYNC_JOBS_WITH_SEARCH_SUCCESS',
+      iterations,
+      updated,
+      fetched,
+    });
   }
 }
