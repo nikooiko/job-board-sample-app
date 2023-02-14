@@ -10,7 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CreateJobDto } from '@app/extra/svc-jobs/dto/create-job.dto';
-import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import {
   ApiCreatedResponse,
@@ -43,9 +43,9 @@ export class JobsController {
   @ApiOperation({
     summary: 'Returns the list of jobs',
   })
-  @ApiOkResponse({ type: ListJobDto })
+  @ApiOkResponse({ type: JobsListDto })
   @ApiAppBadRequestResponse()
-  findAll(@Query() query: FindAllJobsQueryDto): Promise<ListJobDto> {
+  findAll(@Query() query: FindAllJobsQueryDto): Promise<JobsListDto> {
     return this.jobsService.findAll({
       take: query.limit,
       skip: query.page * query.limit,

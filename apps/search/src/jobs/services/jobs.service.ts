@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
-import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { ElasticsearchService } from '@app/extra/elasticsearch/services/elasticsearch.service';
@@ -29,7 +29,7 @@ export class JobsService {
     });
   }
 
-  async search(params: SearchJobsQueryDto): Promise<ListJobDto> {
+  async search(params: SearchJobsQueryDto): Promise<JobsListDto> {
     const { page, limit, searchText, employmentType, salaryFrom, salaryTo } =
       params;
     const filter: QueryDslQueryContainer[] = [];

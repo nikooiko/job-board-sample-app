@@ -20,7 +20,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
@@ -38,9 +38,9 @@ export class JobsController {
   @ApiOperation({
     summary: 'Searches for matching jobs',
   })
-  @ApiOkResponse({ type: ListJobDto })
+  @ApiOkResponse({ type: JobsListDto })
   @ApiAppBadRequestResponse()
-  search(@Query() query: SearchJobsQueryDto): Promise<ListJobDto> {
+  search(@Query() query: SearchJobsQueryDto): Promise<JobsListDto> {
     return this.svcSearchService.searchJobs(query);
   }
 
@@ -58,10 +58,10 @@ export class JobsController {
   @ApiOperation({
     summary: 'Returns the list of jobs',
   })
-  @ApiOkResponse({ type: ListJobDto })
+  @ApiOkResponse({ type: JobsListDto })
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
-  findAll(@Query() query: FindAllJobsQueryDto): Promise<ListJobDto> {
+  findAll(@Query() query: FindAllJobsQueryDto): Promise<JobsListDto> {
     return this.jobsService.findAll(query);
   }
 

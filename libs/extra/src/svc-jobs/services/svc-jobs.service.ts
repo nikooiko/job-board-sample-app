@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { CreateJobDto } from '@app/extra/svc-jobs/dto/create-job.dto';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
-import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { PatchJobDto } from '@app/extra/svc-jobs/dto/patch-job.dto';
 import { ConfigType } from '@nestjs/config';
 import { wrapSvcRequest } from '@app/core/api/utils/wrap-svc-request.util';
@@ -27,9 +27,9 @@ export class SvcJobsService {
     );
   }
 
-  async findAll(query: FindAllJobsQueryDto): Promise<ListJobDto> {
-    return wrapSvcRequest<ListJobDto>(
-      this.httpService.get<ListJobDto>(this.apiUrl, { params: query }),
+  async findAll(query: FindAllJobsQueryDto): Promise<JobsListDto> {
+    return wrapSvcRequest<JobsListDto>(
+      this.httpService.get<JobsListDto>(this.apiUrl, { params: query }),
     );
   }
 

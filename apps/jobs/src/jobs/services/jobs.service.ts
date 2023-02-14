@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { Prisma } from '@app/jobs/prisma-client';
 import { JobsPrismaService } from '../../jobs-prisma/services/jobs-prisma.service';
-import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
@@ -41,7 +41,7 @@ export class JobsService {
       where?: Prisma.JobWhereInput;
       orderBy?: Prisma.JobOrderByWithRelationInput;
     } = {},
-  ): Promise<ListJobDto> {
+  ): Promise<JobsListDto> {
     const { skip, take = 10, cursor, where, orderBy } = params;
     const [items, count] = await Promise.all([
       this.prisma.job.findMany({
