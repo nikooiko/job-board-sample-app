@@ -63,14 +63,14 @@ export const jobSeeds = async (prisma: PrismaClient) => {
       description:
         'Provide technical support to end-users, install and maintain computer systems and networks.',
       salary: 65000,
-      employmentType: 'FULL_TIME',
+      employmentType: 'PART_TIME',
     },
     {
       title: 'Content Writer',
       description:
         'Write clear and compelling content for websites, marketing materials, and other forms of media.',
       salary: 65000,
-      employmentType: 'FULL_TIME',
+      employmentType: 'PART_TIME',
     },
     {
       title: 'Data Scientist',
@@ -100,7 +100,7 @@ export const jobSeeds = async (prisma: PrismaClient) => {
       employmentType: 'FULL_TIME',
     },
   ];
-  await prisma.job.createMany({
+  return prisma.job.createMany({
     data: jobs,
   });
 };
