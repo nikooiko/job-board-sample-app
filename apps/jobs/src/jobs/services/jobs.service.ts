@@ -83,6 +83,7 @@ export class JobsService {
     const job = await this.prisma.job.delete({
       where,
     });
+    await this.tryRemoveFromIndex(job.id); // always resolves
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
     return job;
   }
@@ -124,5 +125,40 @@ export class JobsService {
         data,
       });
     }
+  }
+
+  /**
+   * Tries to remove a job from the search index. Returns true if operation failed and need to retry it later on.
+   * @param {boolean} id
+   * @returns {Promise<boolean>}
+   */
+  async tryRemoveFromIndex(id: number): Promise<boolean> {
+    try {
+      await this.svcSearchService.removeJob(id);
+      this.logger.info('Removed job from search index', {
+        type: 'INDEX_REMOVE_JOB_SUCCESS',
+        id,
+      });
+      return false;
+    } catch (err) {
+      const errorResponse = err?.getResponse();
+      if (errorResponse?.status === 404) {
+        this.logger.error('Failed to index job', {
+          type: 'INDEX_REMOVE_JOB_NOT_FOUND',
+          err,
+          errorResponse,
+          id,
+        });
+        // when job is not found, we don't need to retry the operation
+        return false;
+      }
+      this.logger.error('Failed to index job', {
+        type: 'INDEX_REMOVE_JOB_FAILED',
+        err,
+        errorResponse,
+        id,
+      });
+    }
+    return true;
   }
 }
