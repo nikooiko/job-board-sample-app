@@ -38,7 +38,7 @@ export class JobsService {
       must.push({
         multi_match: {
           query: searchText,
-          fields: ['title', 'description'],
+          fields: ['title^4', 'description'],
         },
       });
     }
