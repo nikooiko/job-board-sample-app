@@ -20,7 +20,7 @@ export class JobsService {
       data,
     });
     this.logger.info('Created job', { type: 'JOB_CREATED', id: job.id, data });
-    await this.tryUploadToIndex(job.id, job); // always resolves
+    await this.tryUploadToSearch(job.id, job); // always resolves
     return job;
   }
 
@@ -74,7 +74,7 @@ export class JobsService {
     });
     this.logger.info('Updated job', { type: 'JOB_UPDATED', where, data });
     if (updateSearch) {
-      await this.tryUploadToIndex(job.id, job); // always resolves
+      await this.tryUploadToSearch(job.id, job); // always resolves
     }
     return job;
   }
@@ -83,7 +83,7 @@ export class JobsService {
     const job = await this.prisma.job.delete({
       where,
     });
-    await this.tryRemoveFromIndex(job.id); // always resolves
+    await this.tryRemoveFromSearch(job.id); // always resolves
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
     return job;
   }
@@ -93,7 +93,7 @@ export class JobsService {
    * @param {number} id
    * @param {JobDto} [job]
    */
-  async tryUploadToIndex(id: number, job?: JobDto): Promise<void> {
+  async tryUploadToSearch(id: number, job?: JobDto): Promise<void> {
     let data = job;
     try {
       if (!data) {
@@ -111,14 +111,14 @@ export class JobsService {
         false,
       );
       this.logger.info('Added job to search index', {
-        type: 'INDEX_ADD_JOB_SUCCESS',
+        type: 'SEARCH_UPLOAD_JOB_SUCCESS',
         id,
         data,
       });
     } catch (err) {
       const errorResponse = err?.getResponse();
       this.logger.error('Failed to index job', {
-        type: 'INDEX_ADD_JOB_FAILED',
+        type: 'SEARCH_UPLOAD_JOB_FAILED',
         err,
         errorResponse,
         id,
@@ -132,11 +132,11 @@ export class JobsService {
    * @param {boolean} id
    * @returns {Promise<boolean>}
    */
-  async tryRemoveFromIndex(id: number): Promise<boolean> {
+  async tryRemoveFromSearch(id: number): Promise<boolean> {
     try {
       await this.svcSearchService.removeJob(id);
       this.logger.info('Removed job from search index', {
-        type: 'INDEX_REMOVE_JOB_SUCCESS',
+        type: 'SEARCH_REMOVE_JOB_SUCCESS',
         id,
       });
       return false;
@@ -144,7 +144,7 @@ export class JobsService {
       const errorResponse = err?.getResponse();
       if (errorResponse?.status === 404) {
         this.logger.error('Failed to index job', {
-          type: 'INDEX_REMOVE_JOB_NOT_FOUND',
+          type: 'SEARCH_REMOVE_JOB_NOT_FOUND',
           err,
           errorResponse,
           id,
@@ -153,7 +153,7 @@ export class JobsService {
         return false;
       }
       this.logger.error('Failed to index job', {
-        type: 'INDEX_REMOVE_JOB_FAILED',
+        type: 'SEARCH_REMOVE_JOB_FAILED',
         err,
         errorResponse,
         id,
