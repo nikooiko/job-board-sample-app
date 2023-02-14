@@ -21,11 +21,21 @@ import {
 import { JobsService } from '../services/jobs.service';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
+import { jobsIndex } from '../indices/jobs.index';
 
 @ApiTags('Jobs')
 @Controller('jobs')
 export class JobsController {
   constructor(private readonly jobsService: JobsService) {}
+
+  @Get('index')
+  @ApiOperation({
+    summary: 'Returns the name of the active job index',
+  })
+  @ApiOkResponse()
+  async getIndexName(): Promise<string> {
+    return jobsIndex.index;
+  }
 
   @Post()
   @ApiOperation({

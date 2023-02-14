@@ -19,6 +19,12 @@ export class SvcSearchService {
     this.jobsUrl = `${config.rootUrl}/jobs`;
   }
 
+  async indexName(): Promise<string> {
+    return wrapSvcRequest<string>(
+      this.httpService.get(`${this.jobsUrl}/index`),
+    );
+  }
+
   async searchJobs(params: SearchJobsQueryDto): Promise<ListJobDto> {
     return wrapSvcRequest<ListJobDto>(
       this.httpService.get(this.jobsUrl, { params }),
