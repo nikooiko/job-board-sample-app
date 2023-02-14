@@ -22,6 +22,7 @@ import { JobsService } from '../services/jobs.service';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { jobsIndex } from '../indices/jobs.index';
+import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -41,9 +42,9 @@ export class JobsController {
   @ApiOperation({
     summary: 'Updates or creates a job document at jobs search index',
   })
-  @ApiCreatedResponse()
+  @ApiCreatedResponse({ type: UpsertJobResponseDto })
   @ApiAppBadRequestResponse()
-  upsert(@Body() data: JobDto): Promise<string> {
+  upsert(@Body() data: JobDto): Promise<UpsertJobResponseDto> {
     return this.jobsService.upsert(data);
   }
 

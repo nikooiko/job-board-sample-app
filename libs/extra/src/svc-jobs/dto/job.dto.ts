@@ -26,11 +26,11 @@ export class JobDto implements Job {
   @ApiProperty({ enum: EmploymentType })
   @IsEnum(EmploymentType)
   employmentType: EmploymentType;
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, type: String })
   @IsString()
   @IsOptional()
   searchIndex: string | null = null;
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, type: String })
   @IsString()
   @IsOptional()
   searchableSince: Date | null = null;

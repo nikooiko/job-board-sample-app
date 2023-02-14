@@ -13,6 +13,7 @@ import { jobsIndex } from '../indices/jobs.index';
 import { dtoToSearchConverter } from '../converters/dto-to-search.converter';
 import { SearchJobDoc } from '../interfaces/search-job-doc.interface';
 import { searchToDtoConverter } from '../converters/search-to-dto.converter';
+import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
 
 @Injectable()
 export class JobsService {
@@ -92,14 +93,23 @@ export class JobsService {
     };
   }
 
-  async upsert(job: JobDto): Promise<string> {
+  async upsert(job: JobDto): Promise<UpsertJobResponseDto> {
+    const searchIndex = jobsIndex.index;
+    const searchableSince = new Date();
     await this.elasticsearchService.index({
-      index: jobsIndex.index,
+      index: searchIndex,
       id: job.id.toString(),
-      document: dtoToSearchConverter(job),
+      document: {
+        ...dtoToSearchConverter(job),
+        searchIndex,
+        searchableSince,
+      },
     });
     this.logger.info('Upsert job', { type: 'SEARCH_JOB_UPSERT', job });
-    return jobsIndex.index;
+    return {
+      searchIndex,
+      searchableSince,
+    };
   }
 
   async remove(id: number): Promise<void> {

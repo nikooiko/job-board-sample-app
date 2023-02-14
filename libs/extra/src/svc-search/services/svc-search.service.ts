@@ -19,23 +19,25 @@ export class SvcSearchService {
     this.jobsUrl = `${config.rootUrl}/jobs`;
   }
 
-  async indexName(): Promise<string> {
+  async indexName() {
     return wrapSvcRequest<string>(
       this.httpService.get(`${this.jobsUrl}/index`),
     );
   }
 
-  async searchJobs(params: SearchJobsQueryDto): Promise<ListJobDto> {
+  async searchJobs(params: SearchJobsQueryDto) {
     return wrapSvcRequest<ListJobDto>(
       this.httpService.get(this.jobsUrl, { params }),
     );
   }
 
-  async upsertJob(job: JobDto): Promise<string> {
-    return wrapSvcRequest<string>(this.httpService.post(this.jobsUrl, job));
+  async upsertJob(job: JobDto) {
+    return wrapSvcRequest<{ searchableSince: Date; searchIndex: string }>(
+      this.httpService.post(this.jobsUrl, job),
+    );
   }
 
-  async removeJob(id: number): Promise<void> {
+  async removeJob(id: number) {
     return wrapSvcRequest<void>(
       this.httpService.delete(`${this.jobsUrl}/${id}`),
     );
