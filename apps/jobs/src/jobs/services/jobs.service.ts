@@ -1,16 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { Prisma } from '@app/jobs/prisma-client';
 import { JobsPrismaService } from '../../jobs-prisma/services/jobs-prisma.service';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
+import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
 
 @Injectable()
 export class JobsService {
   constructor(
     private prisma: JobsPrismaService,
     @Inject(LOGGER) private logger: Logger,
+    private svcSearchService: SvcSearchService,
   ) {}
 
   async create(data: Prisma.JobCreateInput): Promise<JobDto> {
@@ -18,6 +20,7 @@ export class JobsService {
       data,
     });
     this.logger.info('Created job', { type: 'JOB_CREATED', id: job.id, data });
+    await this.tryUploadToIndex(job.id, job); // always resolves
     return job;
   }
 
@@ -55,18 +58,24 @@ export class JobsService {
     });
   }
 
-  async update({
-    where,
-    data,
-  }: {
-    where: Prisma.JobWhereUniqueInput;
-    data: Prisma.JobUpdateInput;
-  }): Promise<JobDto> {
+  async update(
+    {
+      where,
+      data,
+    }: {
+      where: Prisma.JobWhereUniqueInput;
+      data: Prisma.JobUpdateInput;
+    },
+    updateSearch = true,
+  ): Promise<JobDto> {
     const job = await this.prisma.job.update({
       data,
       where,
     });
     this.logger.info('Updated job', { type: 'JOB_UPDATED', where, data });
+    if (updateSearch) {
+      await this.tryUploadToIndex(job.id, job); // always resolves
+    }
     return job;
   }
 
@@ -76,5 +85,44 @@ export class JobsService {
     });
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
     return job;
+  }
+
+  /**
+   * Tries to add a job to the search index.
+   * @param {number} id
+   * @param {JobDto} [job]
+   */
+  async tryUploadToIndex(id: number, job?: JobDto): Promise<void> {
+    let data = job;
+    try {
+      if (!data) {
+        data = await this.findOne({ id: id });
+      }
+      const searchIndex = await this.svcSearchService.upsertJob(data);
+      await this.update(
+        {
+          where: { id: data.id },
+          data: {
+            searchIndex,
+            searchableSince: new Date(),
+          },
+        },
+        false,
+      );
+      this.logger.info('Added job to search index', {
+        type: 'INDEX_ADD_JOB_SUCCESS',
+        id,
+        data,
+      });
+    } catch (err) {
+      const errorResponse = err?.getResponse();
+      this.logger.error('Failed to index job', {
+        type: 'INDEX_ADD_JOB_FAILED',
+        err,
+        errorResponse,
+        id,
+        data,
+      });
+    }
   }
 }

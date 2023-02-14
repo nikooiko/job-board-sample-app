@@ -9,9 +9,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { CreateJobDto } from '@app/extra/jobs/dto/create-job.dto';
-import { ListJobDto } from '@app/extra/jobs/dto/list-job.dto';
-import { JobDto } from '@app/extra/jobs/dto/job.dto';
+import { CreateJobDto } from '@app/extra/svc-jobs/dto/create-job.dto';
+import { ListJobDto } from '@app/extra/svc-jobs/dto/list-job.dto';
+import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -19,9 +19,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JobsService } from '../services/jobs.service';
-import { PatchJobDto } from '@app/extra/jobs/dto/patch-job.dto';
+import { PatchJobDto } from '@app/extra/svc-jobs/dto/patch-job.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
-import { FindAllJobsQueryDto } from '@app/extra/jobs/dto/find-all-jobs-query.dto';
+import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 import { ApiAppNotFoundResponse } from '@app/core/error-handling/decorators/api-app-not-found-response.decorator';
 
 @ApiTags('Jobs')
