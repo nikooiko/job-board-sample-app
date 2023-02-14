@@ -25,6 +25,7 @@ import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/ap
 import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
+import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -38,9 +39,9 @@ export class JobsController {
   @ApiOperation({
     summary: 'Searches for matching jobs',
   })
-  @ApiOkResponse({ type: JobsListDto })
+  @ApiOkResponse({ type: SearchJobsListDto })
   @ApiAppBadRequestResponse()
-  search(@Query() query: SearchJobsQueryDto): Promise<JobsListDto> {
+  search(@Query() query: SearchJobsQueryDto): Promise<SearchJobsListDto> {
     return this.svcSearchService.searchJobs(query);
   }
 

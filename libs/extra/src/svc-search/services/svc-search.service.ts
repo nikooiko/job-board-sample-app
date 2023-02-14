@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import svcSearchConfig from '../config/svc-search.config';
 import { ConfigType } from '@nestjs/config';
 import { wrapSvcRequest } from '@app/core/api/utils/wrap-svc-request.util';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
+import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
 
 @Injectable()
 export class SvcSearchService {
@@ -26,7 +26,7 @@ export class SvcSearchService {
   }
 
   async searchJobs(params: SearchJobsQueryDto) {
-    return wrapSvcRequest<JobsListDto>(
+    return wrapSvcRequest<SearchJobsListDto>(
       this.httpService.get(this.jobsUrl, { params }),
     );
   }

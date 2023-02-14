@@ -8,7 +8,6 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import {
   ApiCreatedResponse,
@@ -23,6 +22,7 @@ import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/ap
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { jobsIndex } from '../indices/jobs.index';
 import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
+import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -52,9 +52,9 @@ export class JobsController {
   @ApiOperation({
     summary: 'Searches for matching jobs',
   })
-  @ApiOkResponse({ type: JobsListDto })
+  @ApiOkResponse({ type: SearchJobsListDto })
   @ApiAppBadRequestResponse()
-  search(@Query() query: SearchJobsQueryDto): Promise<JobsListDto> {
+  search(@Query() query: SearchJobsQueryDto): Promise<SearchJobsListDto> {
     return this.jobsService.search(query);
   }
 

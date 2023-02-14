@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
-import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { ElasticsearchService } from '@app/extra/elasticsearch/services/elasticsearch.service';
@@ -14,6 +13,7 @@ import { dtoToSearchConverter } from '../converters/dto-to-search.converter';
 import { SearchJobDoc } from '../interfaces/search-job-doc.interface';
 import { searchToDtoConverter } from '../converters/search-to-dto.converter';
 import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
+import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
 
 @Injectable()
 export class JobsService {
@@ -29,12 +29,13 @@ export class JobsService {
     });
   }
 
-  async search(params: SearchJobsQueryDto): Promise<JobsListDto> {
+  async search(params: SearchJobsQueryDto): Promise<SearchJobsListDto> {
     const { page, limit, searchText, employmentType, salaryFrom, salaryTo } =
       params;
     const filter: QueryDslQueryContainer[] = [];
+    const must: QueryDslQueryContainer[] = [];
     if (searchText) {
-      filter.push({
+      must.push({
         multi_match: {
           query: searchText,
           fields: ['title', 'description'],
@@ -68,6 +69,7 @@ export class JobsService {
     }
     const query: QueryDslQueryContainer = {
       bool: {
+        must,
         filter,
       },
     };
@@ -87,9 +89,10 @@ export class JobsService {
       query,
     });
     return {
-      items: hits.hits.map((hit) =>
-        searchToDtoConverter(hit._source as SearchJobDoc),
-      ),
+      items: hits.hits.map((hit) => ({
+        ...searchToDtoConverter(hit._source as SearchJobDoc),
+        score: hit._score || 0,
+      })),
       limit,
       count,
       pages: Math.ceil(count / limit),
