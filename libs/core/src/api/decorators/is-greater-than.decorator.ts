@@ -27,7 +27,7 @@ export function IsGreaterThan(
           );
         },
         defaultMessage() {
-          return '$relatedProp should be larger than $constraint1';
+          return '$property should be larger than $constraint1';
         },
       },
     });
