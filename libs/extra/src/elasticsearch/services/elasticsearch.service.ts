@@ -24,13 +24,28 @@ export class ElasticsearchService extends Client {
           type: 'INDEX_EXISTS',
           index: def.index,
         });
+        const { acknowledged } = await this.indices.putMapping({
+          index: def.index,
+          properties: def.mappings?.properties,
+        });
+        if (acknowledged) {
+          this.logger.info('Updated index mapping', {
+            type: 'INDEX_UPDATED',
+            index: def.index,
+          });
+        } else {
+          this.logger.warn('Update index mapping failed', {
+            type: 'INDEX_UPDATE_FAILED',
+            index: def.index,
+          });
+        }
         return;
       }
-      this.logger.info('Creating index', {
-        type: 'CREATING_INDEX',
+      await this.indices.create(def);
+      this.logger.info('Created index', {
+        type: 'INDEX_CREATED',
         index: def.index,
       });
-      await this.indices.create(def);
     } catch (err) {
       this.logger.error('Error checkOrCreate index', {
         type: 'CHECK_OR_CREATE_INDEX_ERROR',
