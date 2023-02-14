@@ -23,7 +23,10 @@ export class JobsService {
   ) {}
 
   async init() {
-    await this.elasticsearchService.checkOrCreateIndex(jobsIndex); // always resolves
+    // check index at next tick for more graceful startup
+    setImmediate(async () => {
+      await this.elasticsearchService.checkOrCreateIndex(jobsIndex); // always resolves
+    });
   }
 
   async search(params: SearchJobsQueryDto): Promise<ListJobDto> {
@@ -96,16 +99,17 @@ export class JobsService {
   async upsert(job: JobDto): Promise<UpsertJobResponseDto> {
     const searchIndex = jobsIndex.index;
     const searchableSince = new Date();
+    const document = dtoToSearchConverter({
+      ...job,
+      searchIndex,
+      searchableSince,
+    });
     await this.elasticsearchService.index({
       index: searchIndex,
       id: job.id.toString(),
-      document: {
-        ...dtoToSearchConverter(job),
-        searchIndex,
-        searchableSince,
-      },
+      document,
     });
-    this.logger.info('Upsert job', { type: 'SEARCH_JOB_UPSERT', job });
+    this.logger.info('Upsert job', { type: 'SEARCH_JOB_UPSERT', document });
     return {
       searchIndex,
       searchableSince,

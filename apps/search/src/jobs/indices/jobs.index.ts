@@ -8,6 +8,7 @@ export const jobsIndex: IndicesCreateRequest = {
       description: { type: 'text', analyzer: 'english' },
       salary: { type: 'integer' },
       employment_type: { type: 'keyword' },
+      searchable_since: { type: 'date' },
     },
   },
 };
