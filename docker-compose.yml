@@ -1,6 +1,71 @@
 version: "3.9"
 
+x-svc-url-variables: &svc-url-variables
+  - JOBS_SVC_ROOT_URL: "http://jobs:4000"
+  - SEARCH_SVC_ROOT_URL: "http://search:4001"
+  - ELASTICSEARCH_NODE: "http://elasticsearch:9200"
+
 services:
+  gateway:
+    depends_on:
+      - jobs
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        SERVICE_NAME: gateway
+    env_file:
+      - .env
+    environment:
+      <<: *svc-url-variables
+      SERVICE_NAME: gateway
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/gateway:/node/apps/gateway:cached
+      - ./libs:/node/libs:cached
+    networks:
+      app_net:
+  jobs:
+    depends_on:
+      - search
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        SERVICE_NAME: jobs
+    env_file:
+      - .env
+    environment:
+      <<: *svc-url-variables
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/job-board-sample-app?schema=jobs"
+      SERVICE_NAME: jobs
+    volumes:
+      - ./apps/jobs:/node/apps/jobs:cached
+      - ./libs:/node/libs:cached
+    networks:
+      app_net:
+  search:
+    depends_on:
+      - elasticsearch
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        SERVICE_NAME: search
+    env_file:
+      - .env
+    environment:
+      <<: *svc-url-variables
+      SERVICE_NAME: search
+    volumes:
+      - ./apps/search:/node/apps/search:cached
+      - ./libs:/node/libs:cached
+    networks:
+      app_net:
   postgres:
     image: "postgres:15.1"
     environment:
