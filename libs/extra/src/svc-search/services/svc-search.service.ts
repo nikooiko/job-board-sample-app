@@ -16,7 +16,7 @@ export class SvcSearchService {
     private readonly config: ConfigType<typeof svcSearchConfig>,
     private readonly httpService: HttpService,
   ) {
-    this.jobsUrl = `${config.rootUrl}/jobs`;
+    this.jobsUrl = `${config.rootUrl}/private/api/v1/search-svc/jobs`;
   }
 
   async indexName() {
