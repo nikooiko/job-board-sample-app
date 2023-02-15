@@ -3,6 +3,7 @@ import { BaseExceptionFilter } from '@nestjs/core';
 import { Logger } from 'winston';
 import { LOGGER } from '../../logger/factories/logger.factory';
 import { AppInternalServerErrorException } from '../exceptions/app-internal-server-error.exception';
+import { AxiosError } from 'axios';
 
 /**
  * This filter is used to catch all exceptions that are not handled by the other attached filters. Handles exception in
@@ -22,12 +23,31 @@ export class AppExceptionsFilter extends BaseExceptionFilter {
   }
 
   exceptionToHttp(err: any): HttpException {
-    if (err instanceof HttpException) {
-      return err;
+    let finalError = err;
+    if (err instanceof AxiosError) {
+      if (err.cause) {
+        this.logger.warn('Axios error cause', {
+          type: 'AXIOS_ERROR_CAUSE',
+          err: err.cause,
+        });
+      }
+      const httpError = err?.response?.data;
+      finalError = httpError?.statusCode
+        ? new HttpException(httpError, httpError.statusCode)
+        : new AppInternalServerErrorException();
     }
-    this.logger.error('Uncaught exception occurred', {
-      err,
-      type: 'UNCAUGHT_EXCEPTION',
+    if (finalError instanceof HttpException) {
+      if (finalError.getStatus() >= 500) {
+        this.logger.error('Server error occurred', {
+          err: finalError,
+          type: 'SERVER_ERROR',
+        });
+      }
+      return finalError;
+    }
+    this.logger.error('Unknown exception occurred', {
+      err: finalError,
+      type: 'UNKNOWN_ERROR',
     });
     return new AppInternalServerErrorException();
   }
