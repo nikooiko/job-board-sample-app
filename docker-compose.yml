@@ -4,11 +4,13 @@ x-svc-url-variables: &svc-url-variables
   - JOBS_SVC_ROOT_URL: "http://jobs:4000"
   - SEARCH_SVC_ROOT_URL: "http://search:4001"
   - ELASTICSEARCH_NODE: "http://elasticsearch:9200"
+  - REDIS_HOST: "redis"
 
 services:
   gateway:
     depends_on:
       - jobs
+      - redis
     build:
       context: .
       dockerfile: docker/Dockerfile
