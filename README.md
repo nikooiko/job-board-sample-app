@@ -1,18 +1,9 @@
 # Job Board Sample Application
 
-## Description
+## Prerequisites
 
+- Docker + Docker-compose
 - [Node Version Manager](https://github.com/nvm-sh/nvm)
-- [NestJS framework](https://nestjs.com/).
-
-## Installation
-
-```bash
-nvm install node # installs latest nodejs version
-node -v > .nvmrc # saves current nodejs version for later use
-nvm use # loads and uses saved nodejs version
-npm install # installs nodejs packages
-```
 
 ## Setup Dev Environment
 
@@ -22,28 +13,51 @@ Copy example .env
 cp .env.example .env
 ```
 
-## Running the app
+Install NodeJS
+
+```bash
+nvm install node # installs latest nodejs version
+node -v > .nvmrc # saves current nodejs version for later use
+nvm use # loads and uses saved nodejs version
+npm install # installs nodejs packages
+```
+
+## Running apps + services with docker-compose
+
+```bash
+docker-compose up # starts all apps and services
+```
+
+## Running the services with docker-compose
+
+```bash
+docker-compose up elasticsearch postgres redis # starts all services
+```
+
+## Running the apps natively
 
 ```bash
 # development
-$ npm run start
+$ SERVICE_NAME=<service-name> npm run start
 
 # watch mode
-$ npm run start:dev
+$ SERVICE_NAME=<service-name> npm run start:dev
 
 # production mode
-$ npm run start:prod
+$ SERVICE_NAME=<service-name> npm run start:prod
 ```
 
-## Test
+HINT: SERVICE_NAMES= `jobs | gateway | search` (e.g. `SERVICE_NAME=jobs npm run start:dev`)
+
+## Testing
 
 ```bash
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
 # test coverage
 $ npm run test:cov
+
+# Service-only e2e tests
+$ SERVICE_NAME=<service-name> npm run test:e2e
 ```
