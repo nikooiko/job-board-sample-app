@@ -1,5 +1,7 @@
 # Job Board Sample Application
 
+[Specification](./specification.pdf)
+
 ## Prerequisites
 
 - Docker + Docker-compose
