@@ -27,13 +27,13 @@ npm install # installs nodejs packages
 ## Running apps + services with docker-compose
 
 ```bash
-docker-compose up # starts all apps and services
+npm run dc:start:all # starts all apps and services
 ```
 
 ## Running the services with docker-compose
 
 ```bash
-docker-compose up elasticsearch postgres redis # starts all services
+npm run dc:start:services # starts all services
 ```
 
 ## Running the apps natively
