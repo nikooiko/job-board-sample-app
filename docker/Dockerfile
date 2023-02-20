@@ -3,6 +3,7 @@ ARG NODE_TAG=19.4.0
 FROM node:$NODE_TAG as dev
 USER node
 WORKDIR /node
+# copies package.json, package-lock.json, nest-cli, tsconfig.build.json and tsconfig.json
 COPY *.json ./
 RUN npm ci
 ENV PATH /node/node_modules/.bin:$PATH
@@ -12,6 +13,7 @@ ARG SERVICE_NAME
 ENV SERVICE_NAME=$SERVICE_NAME
 ENV NODE_ENV=development
 RUN npm run prisma:all:generate
+RUN npm run build $SERVICE_NAME
 CMD npm run start:dev
 
 FROM node:$NODE_TAG-slim as production-build
