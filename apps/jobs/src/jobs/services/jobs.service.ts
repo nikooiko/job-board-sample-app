@@ -6,6 +6,10 @@ import { JobsListDto } from '@app/extra/svc-jobs/dto/jobs-list.dto';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { TASKS_QUEUE_REPEATABLE_JOBS } from '../constants/tasks-queue-repeatable-jobs';
+import { TASKS_QUEUE } from '../constants/tasks-queue.constant';
 
 @Injectable()
 export class JobsService {
@@ -15,12 +19,17 @@ export class JobsService {
     private prisma: JobsPrismaService,
     @Inject(LOGGER) private logger: Logger,
     private svcSearchService: SvcSearchService,
+    @InjectQueue(TASKS_QUEUE) private tasksQ: Queue,
   ) {}
 
+  /**
+   * Jobs Service initialization procedure adds sync jobs task to the jobs task queue and after a while (next tick)
+   * checks for duplicate repeatable task configurations
+   */
   async init() {
     // sync jobs with search at next tick for more graceful startup
     setImmediate(async () => {
-      await this.syncJobsWithSearch(); // always resolves
+      await this.setupTasks(); // always resolves
     });
   }
 
@@ -232,5 +241,36 @@ export class JobsService {
       updated,
       fetched,
     });
+  }
+
+  async setupTasks() {
+    try {
+      this.logger.info('Setting up tasks', { type: 'SETUP_TASKS_STARTED' });
+      for (const jobDef of TASKS_QUEUE_REPEATABLE_JOBS) {
+        await this.tasksQ.add(jobDef.name, jobDef.data, jobDef.options);
+      }
+      const tasks = await this.tasksQ.getRepeatableJobs();
+      for (const task of tasks) {
+        const findMatchingDef = TASKS_QUEUE_REPEATABLE_JOBS.find(
+          (t) => t.name === task.name,
+        );
+        if (
+          !findMatchingDef ||
+          task.cron !== findMatchingDef.options.repeat.cron
+        ) {
+          await this.tasksQ.removeRepeatableByKey(task.key);
+          this.logger.warn('Removed repeatable task with old configuration', {
+            type: 'REMOVED_JOBS_TASK',
+            task,
+          });
+        }
+      }
+      this.logger.info('Setting up tasks', { type: 'SETUP_TASKS_FINISHED' });
+    } catch (err) {
+      this.logger.error('Failed to setup tasks', {
+        type: 'JOBS_SETUP_TASKS_FAILED',
+        err,
+      });
+    }
   }
 }

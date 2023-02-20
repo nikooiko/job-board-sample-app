@@ -5,11 +5,21 @@ import { JobsPrismaModule } from '../jobs-prisma/jobs-prisma.module';
 import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import { SvcSearchModule } from '@app/extra/svc-search/svc-search.module';
+import { TasksModule } from '@app/extra/tasks/tasks.module';
+import { SyncJobsWithSearchProcessor } from './processors/sync-jobs-with-search.processor';
+import { TASKS_QUEUE } from './constants/tasks-queue.constant';
 
 @Module({
-  imports: [JobsPrismaModule, SvcSearchModule],
+  imports: [
+    JobsPrismaModule,
+    SvcSearchModule,
+    TasksModule,
+    TasksModule.registerQueue({
+      name: TASKS_QUEUE,
+    }),
+  ],
   controllers: [JobsController],
-  providers: [JobsService],
+  providers: [JobsService, SyncJobsWithSearchProcessor],
 })
 export class JobsModule implements OnApplicationBootstrap {
   constructor(
@@ -18,7 +28,7 @@ export class JobsModule implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap() {
-    await this.jobsService.init(); // always resolves
+    await this.jobsService.init(); // should always resolve
     this.logger.info('Jobs bootstrap success!', {
       type: 'JOBS_BOOTSTRAP',
     });
