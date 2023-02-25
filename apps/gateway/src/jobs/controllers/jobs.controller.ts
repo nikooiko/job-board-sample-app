@@ -31,7 +31,7 @@ import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dt
 @Controller('jobs')
 export class JobsController {
   constructor(
-    private readonly jobsService: SvcJobsService,
+    private readonly svcJobsService: SvcJobsService,
     private readonly svcSearchService: SvcSearchService,
   ) {}
 
@@ -52,7 +52,7 @@ export class JobsController {
   @ApiCreatedResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   create(@Body() data: CreateJobDto): Promise<JobDto> {
-    return this.jobsService.create(data);
+    return this.svcJobsService.create(data);
   }
 
   @Get()
@@ -63,7 +63,7 @@ export class JobsController {
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
   findAll(@Query() query: FindAllJobsQueryDto): Promise<JobsListDto> {
-    return this.jobsService.findAll(query);
+    return this.svcJobsService.findAll(query);
   }
 
   @Get(':id')
@@ -74,7 +74,7 @@ export class JobsController {
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
   findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.jobsService.findOne(id);
+    return this.svcJobsService.findOne(id);
   }
 
   @Patch(':id')
@@ -88,7 +88,7 @@ export class JobsController {
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PatchJobDto,
   ): Promise<JobDto> {
-    return this.jobsService.update(id, data);
+    return this.svcJobsService.update(id, data);
   }
 
   @Delete(':id')
@@ -99,6 +99,6 @@ export class JobsController {
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
   remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.jobsService.remove(id);
+    return this.svcJobsService.remove(id);
   }
 }

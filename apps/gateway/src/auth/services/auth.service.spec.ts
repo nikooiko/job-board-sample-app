@@ -2,9 +2,9 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { mock } from 'jest-mock-extended';
+import { SvcUsersService } from '@app/extra/svc-users/services/svc-users.service';
 import authConfig from '../config/auth.config';
 import { AuthService } from './auth.service';
-import { SvcUsersService } from '../../../../users/src/users/services/svc-users.service';
 
 describe('AuthService', () => {
   let service: AuthService;

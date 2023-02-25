@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UsersService } from './users.service';
 import { mockDeep } from 'jest-mock-extended';
+import { LoggerModule } from '@app/core/logger/logger.module';
 import { UsersPrismaService } from '../../users-prisma/services/users-prisma.service';
-import { JobsPrismaService } from '../../../../jobs/src/jobs-prisma/services/jobs-prisma.service';
+import { UsersService } from './users.service';
+import { ConfigModule } from '@nestjs/config';
+import usersConfig from '../config/users.config';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -10,9 +12,10 @@ describe('UsersService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersService],
+      imports: [LoggerModule, ConfigModule.forFeature(usersConfig)],
+      providers: [UsersService, UsersPrismaService],
     })
-      .overrideProvider(JobsPrismaService)
+      .overrideProvider(UsersPrismaService)
       .useValue(mockUsersPrismaService)
       .compile();
 

@@ -4,10 +4,10 @@ import { LOGGER } from '@app/core/logger/factories/logger.factory';
 import { Logger } from 'winston';
 import bcrypt from 'bcrypt';
 import { ConfigType } from '@nestjs/config';
-import { UsersPrismaService } from '../../users-prisma/services/users-prisma.service';
-import usersConfig from '../config/users.config';
 import { AppUnauthorizedException } from '@app/core/error-handling/exceptions/app-unauthorized.exception';
 import { UserCredentialsDto } from '@app/extra/svc-users/dto/user-credentials.dto';
+import { UsersPrismaService } from '../../users-prisma/services/users-prisma.service';
+import usersConfig from '../config/users.config';
 
 @Injectable()
 export class UsersService {

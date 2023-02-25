@@ -3,9 +3,10 @@ import { JobsPrismaService } from './jobs-prisma.service';
 
 describe('JobsPrismaService', () => {
   let service: JobsPrismaService;
+  let module: TestingModule;
 
   beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
+    module = await Test.createTestingModule({
       providers: [JobsPrismaService],
     }).compile();
 
@@ -14,5 +15,9 @@ describe('JobsPrismaService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  afterEach(async () => {
+    await module.close();
   });
 });
