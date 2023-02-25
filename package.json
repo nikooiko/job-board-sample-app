@@ -24,6 +24,7 @@
     "prisma": "cd apps/${SERVICE_NAME:-jobs}/src/${SERVICE_NAME:-jobs}-prisma && prisma",
     "prisma:all:generate": "for service in jobs users; do SERVICE_NAME=$service npm run prisma generate; done;",
     "dc:up:all": "docker-compose up",
+    "dc:up:apps": "docker-compose up gateway users jobs search",
     "dc:up:services": "docker-compose up elasticsearch postgres redis"
   },
   "dependencies": {

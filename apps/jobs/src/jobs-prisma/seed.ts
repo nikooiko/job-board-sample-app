@@ -1,5 +1,5 @@
 import { PrismaClient } from '@app/jobs/prisma-client';
-import { jobSeeds } from '@app/testing/../../../../libs/extra/src/svc-jobs/seeds/job-seeds';
+import { jobSeeds } from '@app/extra/svc-jobs/seeds/job-seeds';
 
 const prisma = new PrismaClient();
 
