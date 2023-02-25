@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsUUID } from 'class-validator';
-import { User } from '@app/users/prisma-client';
+import { UserDto } from '@app/extra/svc-users/dto/user.dto';
 
-export class UserDataDto implements Partial<User> {
+export class AccessTokenDataDto implements Partial<UserDto> {
   @ApiProperty()
   @IsUUID()
   id: string;
