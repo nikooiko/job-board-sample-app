@@ -6,6 +6,8 @@ import bcrypt from 'bcrypt';
 import { ConfigType } from '@nestjs/config';
 import { UsersPrismaService } from '../../users-prisma/services/users-prisma.service';
 import usersConfig from '../config/users.config';
+import { AppUnauthorizedException } from '@app/core/error-handling/exceptions/app-unauthorized.exception';
+import { UserCredentialsDto } from '@app/extra/svc-users/dto/user-credentials.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,64 +18,41 @@ export class UsersService {
     @Inject(LOGGER) private logger: Logger,
   ) {}
 
-  async findOne(where: Prisma.UserWhereInput): Promise<User> {
+  async findOne(where: Prisma.UserWhereInput): Promise<Omit<User, 'password'>> {
     return this.prisma.user.findFirstOrThrow({
+      select: { id: true, email: true, createdAt: true, updatedAt: true },
       where,
     });
   }
 
-  async create(data: Prisma.UserCreateInput): Promise<User> {
+  async create(data: Prisma.UserCreateInput): Promise<Omit<User, 'password'>> {
+    const { password: unencryptedPassword, ...restData } = data;
     const user = await this.prisma.user.create({
-      data,
+      data: {
+        ...restData,
+        password: await this.hashPassword(unencryptedPassword),
+      },
     });
     this.logger.info('User created', {
       type: 'USER_CREATED',
       email: user.email,
     });
-    return user;
+    const { password: drop, ...userWithoutPass } = user; // omit password
+    return userWithoutPass;
   }
 
-  async update({
-    where,
-    data,
-  }: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
-  }): Promise<User> {
-    const user = await this.prisma.user.update({
-      where,
-      data,
+  async validateCredentials({
+    email,
+    password,
+  }: UserCredentialsDto): Promise<Omit<User, 'password'>> {
+    const user = await this.prisma.user.findFirst({
+      where: { email: { equals: email, mode: 'insensitive' } },
     });
-    this.logger.info('User updated', {
-      type: 'USER_UPDATED',
-      email: user.email,
-    });
-    return user;
-  }
-
-  async delete(where: Prisma.UserWhereUniqueInput): Promise<User> {
-    const user = await this.prisma.user.delete({
-      where,
-    });
-    this.logger.info('User deleted', {
-      type: 'USER_DELETED',
-      email: user.email,
-    });
-    return user;
-  }
-
-  async validateCredentials(
-    email: string,
-    password: string,
-  ): Promise<Omit<User, 'password'> | null> {
-    const user = await this.findOne({
-      email: { equals: email, mode: 'insensitive' },
-    });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      const { password: drop, ...userData } = user; // omit password
-      return userData;
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new AppUnauthorizedException('Invalid credentials');
     }
-    return null;
+    const { password: drop, ...userWithoutPass } = user; // omit password
+    return userWithoutPass;
   }
 
   async hashPassword(password: string): Promise<string> {
