@@ -1,5 +1,5 @@
 import { PrismaClient } from '@app/users/prisma-client';
-import { userSeeds } from '@app/testing/users/seeds/user-seeds';
+import { userSeeds } from '@app/testing/../../../../libs/extra/src/svc-users/seeds/user-seeds';
 
 const prisma = new PrismaClient();
 
