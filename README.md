@@ -49,7 +49,7 @@ $ SERVICE_NAME=<service-name> npm run start:dev
 $ SERVICE_NAME=<service-name> npm run start:prod
 ```
 
-HINT: SERVICE_NAMES= `jobs | gateway | search` (e.g. `SERVICE_NAME=jobs npm run start:dev`)
+HINT: SERVICE_NAMES= `jobs | gateway | search | users` (e.g. `SERVICE_NAME=jobs npm run start:dev`)
 
 ## Testing
 

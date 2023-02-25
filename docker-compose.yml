@@ -32,6 +32,7 @@ services:
   jobs:
     depends_on:
       - search
+      - postgres
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -65,6 +66,25 @@ services:
       SERVICE_NAME: search
     volumes:
       - ./apps/search:/node/apps/search:cached
+      - ./libs:/node/libs:cached
+    networks:
+      app_net:
+  users:
+    depends_on:
+      - postgres
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: dev
+      args:
+        SERVICE_NAME: users
+    env_file:
+      - .env
+    environment:
+      <<: *svc-url-variables
+      SERVICE_NAME: users
+    volumes:
+      - ./apps/users:/node/apps/users:cached
       - ./libs:/node/libs:cached
     networks:
       app_net:
