@@ -45,6 +45,8 @@ services:
       <<: *svc-url-variables
       DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/job-board-sample-app?schema=jobs"
       SERVICE_NAME: jobs
+    ports:
+      - "4000:4000"
     volumes:
       - ./apps/jobs:/node/apps/jobs:cached
       - ./libs:/node/libs:cached
@@ -64,6 +66,8 @@ services:
     environment:
       <<: *svc-url-variables
       SERVICE_NAME: search
+    ports:
+      - "4001:4001"
     volumes:
       - ./apps/search:/node/apps/search:cached
       - ./libs:/node/libs:cached
@@ -83,6 +87,8 @@ services:
     environment:
       <<: *svc-url-variables
       SERVICE_NAME: users
+    ports:
+      - "4002:4002"
     volumes:
       - ./apps/users:/node/apps/users:cached
       - ./libs:/node/libs:cached
