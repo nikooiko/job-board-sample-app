@@ -31,10 +31,7 @@ export class PrismaExceptionsFilter extends BaseExceptionFilter {
   exceptionToHttp(exception: any): HttpException {
     switch (exception.code) {
       case 'P2002':
-        return new AppBadRequestException(
-          'Unique Constraint Violation',
-          'unique_constraint',
-        );
+        return new AppBadRequestException('Already exists', 'already_exists');
       case 'P2025':
         return new AppNotFoundException();
     }
