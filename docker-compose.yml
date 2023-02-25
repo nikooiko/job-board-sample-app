@@ -1,8 +1,10 @@
 version: "3.9"
+# TODO: fix lifecycle checks for better boot sequence
 
 x-svc-url-variables: &svc-url-variables
   - JOBS_SVC_ROOT_URL: "http://jobs:4000"
   - SEARCH_SVC_ROOT_URL: "http://search:4001"
+  - USERS_SVC_ROOT_URL: "http://users:4002"
   - ELASTICSEARCH_NODE: "http://elasticsearch:9200"
   - REDIS_HOST: "redis"
 
@@ -33,6 +35,7 @@ services:
     depends_on:
       - search
       - postgres
+      - redis
     build:
       context: .
       dockerfile: docker/Dockerfile
@@ -86,6 +89,7 @@ services:
       - .env
     environment:
       <<: *svc-url-variables
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/job-board-sample-app?schema=users"
       SERVICE_NAME: users
     ports:
       - "4002:4002"
