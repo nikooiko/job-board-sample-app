@@ -44,6 +44,7 @@ export class UsersController {
   })
   @ApiOkResponse({ type: UserDto })
   @ApiAppUnauthorizedResponse()
+  @ApiAppBadRequestResponse()
   validateCredentials(@Body() data: UserCredentialsDto): Promise<UserDto> {
     return this.usersService.validateCredentials(data);
   }
