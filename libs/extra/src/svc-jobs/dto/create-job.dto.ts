@@ -1,14 +1,20 @@
-import { ApiProperty, OmitType } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { EmploymentType } from '@app/jobs/prisma-client';
 import { IsEnum, IsPositive, IsString } from 'class-validator';
 
-export class CreateJobDto extends OmitType(JobDto, [
-  'id',
-  'ownerId',
-  'searchIndex',
-  'searchableSince',
-] as const) {
+export class CreateJobDto
+  implements
+    Omit<
+      JobDto,
+      | 'id'
+      | 'ownerId'
+      | 'searchIndex'
+      | 'searchableSince'
+      | 'createdAt'
+      | 'updatedAt'
+    >
+{
   @ApiProperty()
   @IsString()
   title: string;
