@@ -4,6 +4,7 @@ export const jobsIndex: IndicesCreateRequest = {
   index: 'jobs',
   mappings: {
     properties: {
+      owner_id: { type: 'keyword' },
       title: { type: 'text', analyzer: 'english' },
       description: { type: 'text', analyzer: 'english' },
       salary: { type: 'integer' },

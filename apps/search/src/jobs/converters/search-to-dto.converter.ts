@@ -3,11 +3,14 @@ import { SearchJobDoc } from '../interfaces/search-job-doc.interface';
 import { jobsIndex } from '../indices/jobs.index';
 
 export const searchToDtoConverter = (doc: SearchJobDoc): JobDto => {
-  const { employment_type, searchable_since, ...rest } = doc;
   return {
-    ...rest,
-    employmentType: employment_type,
-    searchableSince: searchable_since,
+    id: doc.id,
+    ownerId: doc.owner_id,
+    title: doc.title,
+    description: doc.description,
+    salary: doc.salary,
+    employmentType: doc.employment_type,
+    searchableSince: doc.searchable_since,
     searchIndex: jobsIndex.index,
   };
 };
