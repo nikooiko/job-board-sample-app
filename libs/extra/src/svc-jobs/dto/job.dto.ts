@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
   Min,
+  ValidateIf,
 } from 'class-validator';
 
 export class JobDto implements Omit<Job, 'deletedAt'> {
@@ -30,11 +31,13 @@ export class JobDto implements Omit<Job, 'deletedAt'> {
   @ApiProperty({ enum: EmploymentType })
   @IsEnum(EmploymentType)
   employmentType: EmploymentType;
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, type: String })
   @IsString()
+  @ValidateIf((object, value) => value !== null)
   searchIndex: string | null = null;
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ nullable: true, type: Date })
   @IsDate()
+  @ValidateIf((object, value) => value !== null)
   searchableSince: Date | null = null;
   @ApiProperty()
   @IsDate()
