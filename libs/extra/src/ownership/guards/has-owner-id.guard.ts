@@ -10,7 +10,6 @@ export class HasOwnerIdGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
     const ownerId = req.headers[APP_OWNER_ID_HEADER];
-    console.log('ownerId', ownerId, req.headers);
     if (!ownerId || typeof ownerId !== 'string') {
       throw new AppForbiddenException();
     }
