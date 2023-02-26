@@ -13,20 +13,24 @@ model User {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   email     String   @unique
   password  String
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   Profile Profile?
+
+  @@map("users")
 }
 
 model Profile {
   id        Int    @id @default(autoincrement())
-  firstName String
-  lastName  String
+  firstName String @map("first_name")
+  lastName  String @map("last_name")
 
-  createdAt DateTime @default(now()) @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   owner   User   @relation(fields: [ownerId], references: [id])
-  ownerId String @unique @db.Uuid
+  ownerId String @unique @map("owner_id") @db.Uuid
+
+  @@map("profiles")
 }
