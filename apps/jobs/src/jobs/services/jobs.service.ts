@@ -14,7 +14,8 @@ import { TASKS_QUEUE } from '../constants/tasks-queue.constant';
 
 @Injectable()
 export class JobsService {
-  static PARALLEL_UPLOAD_LIMIT = 10;
+  static PARALLEL_UPLOAD_LIMIT = 10; // arbitrary limit
+  static PARALLEL_DELETE_LIMIT = 100; // arbitrary limit
 
   constructor(
     private prisma: JobsPrismaService,
@@ -62,8 +63,8 @@ export class JobsService {
         take,
         cursor,
         where: {
+          deletedAt: null, // this is set before where, in case where overrides it (e.g. query on deleted jobs)
           ...where,
-          deletedAt: null,
         },
         orderBy,
       }),
@@ -81,8 +82,8 @@ export class JobsService {
     return exclude(
       await this.prisma.job.findUniqueOrThrow({
         where: {
+          deletedAt: null, // this is set before where, in case where overrides it (e.g. query on deleted jobs)
           ...where,
-          deletedAt: null,
         },
       }),
       ['deletedAt'],
@@ -103,8 +104,8 @@ export class JobsService {
       await this.prisma.job.update({
         data,
         where: {
+          deletedAt: null, // this is set before where, in case where overrides it (e.g. query on deleted jobs)
           ...where,
-          deletedAt: null,
         },
       }),
       ['deletedAt'],
@@ -117,12 +118,15 @@ export class JobsService {
   }
 
   async remove(where: Prisma.JobWhereUniqueInput): Promise<JobDto> {
-    const job = exclude(
-      await this.prisma.job.update({
-        where: { ...where, deletedAt: null },
+    const job = await this.update(
+      {
+        where: {
+          deletedAt: null, // this is set before where, in case where overrides it (e.g. query on deleted jobs)
+          ...where,
+        },
         data: { deletedAt: new Date() },
-      }),
-      ['deletedAt'],
+      },
+      false,
     );
     await this.tryRemoveFromSearch(job.id); // always resolves
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
@@ -160,7 +164,7 @@ export class JobsService {
         data,
       });
     } catch (err) {
-      const errorResponse = err?.getResponse?.();
+      const errorResponse = err.isAxiosError && err.response?.data;
       this.logger.error('Failed to index job', {
         type: 'SEARCH_UPLOAD_JOB_FAILED',
         err,
@@ -179,47 +183,52 @@ export class JobsService {
   async tryRemoveFromSearch(id: number): Promise<boolean> {
     try {
       await this.svcSearchService.removeJob(id);
-      await this.prisma.job.update({
-        where: { id },
-        data: { searchIndex: null, searchableSince: null },
-      });
       this.logger.info('Removed job from search index', {
         type: 'SEARCH_REMOVE_JOB_SUCCESS',
         id,
       });
-      return false;
     } catch (err) {
-      const errorResponse = err?.getResponse?.();
-      if (errorResponse?.status === 404) {
+      const errorResponse = err.isAxiosError && err.response?.data;
+      if (errorResponse?.statusCode !== 404) {
         this.logger.error('Failed to remove job from index', {
-          type: 'SEARCH_REMOVE_JOB_NOT_FOUND',
+          type: 'SEARCH_REMOVE_JOB_FAILED',
           err,
           errorResponse,
           id,
         });
-        // when job is not found, we don't need to retry the operation
-        return false;
+        return true;
       }
       this.logger.error('Failed to remove job from index', {
-        type: 'SEARCH_REMOVE_JOB_FAILED',
+        type: 'SEARCH_REMOVE_JOB_NOT_FOUND',
         err,
         errorResponse,
         id,
       });
-      return true;
     }
+    await this.update(
+      {
+        where: { id, deletedAt: { not: { equals: null } } },
+        data: { searchIndex: null, searchableSince: null },
+      },
+      false,
+    );
+    // when job is not found, we don't need to retry the operation
+    return false;
   }
 
-  async syncJobsWithSearch(): Promise<void> {
+  /**
+   * Uploads jobs that were not previously uploaded to the search index.
+   */
+  async uploadJobsToIndex(): Promise<void> {
     const take = JobsService.PARALLEL_UPLOAD_LIMIT;
     const fetchedSet = new Set();
     const indexName = await this.svcSearchService.indexName();
-    let updated = 0;
+    let attempts = 0;
     let fetched = 0;
     let iterations = 0;
     try {
       while (true) {
-        const { items: jobPosts } = await this.findAll({
+        const { items: jobs } = await this.findAll({
           where: {
             OR: [
               {
@@ -238,7 +247,7 @@ export class JobsService {
           },
           take,
         });
-        jobPosts.forEach(({ id }: JobDto) => fetchedSet.add(id));
+        jobs.forEach(({ id }: JobDto) => fetchedSet.add(id));
         const newFetched = fetchedSet.size;
         if (newFetched === fetched) {
           // this is a failsafe mechanism, in case something goes wrong with the synchronization, to avoid infinite loops
@@ -246,28 +255,86 @@ export class JobsService {
         }
         fetched = newFetched;
         iterations++;
+        attempts += jobs.length;
         // TODO: create bulk upload method (not one by one as now)
-        for (const jobPost of jobPosts) {
-          await this.tryUploadToSearch(jobPost.id, jobPost);
-          updated++;
-        }
+        await Promise.all(
+          jobs.map((job) => this.tryUploadToSearch(job.id, job)),
+        );
       }
     } catch (err) {
-      this.logger.error('Upload job posts to search failed!', {
-        type: 'SYNC_JOBS_WITH_SEARCH_FAILURE',
+      this.logger.error('Bulk Upload job posts to search failed!', {
+        type: 'BULK_UPLOAD_JOBS_TO_SEARCH_FAILED',
         err,
         iterations,
         fetched,
-        updated,
+        attempts,
       });
       return;
     }
-    this.logger.info('Synced jobs search successfully', {
-      type: 'SYNC_JOBS_WITH_SEARCH_SUCCESS',
+    this.logger.info('Bulk uploaded jobs to search successfully', {
+      type: 'BULK_UPLOAD_JOBS_TO_SEARCH_SUCCESS',
       iterations,
-      updated,
+      attempts,
       fetched,
     });
+  }
+
+  /**
+   * Deletes jobs, that are currently soft deleted, from the search index.
+   */
+  async removeJobsFromIndex(): Promise<void> {
+    const take = JobsService.PARALLEL_DELETE_LIMIT;
+    const fetchedSet = new Set();
+    const indexName = await this.svcSearchService.indexName();
+    let attempts = 0;
+    let fetched = 0;
+    let iterations = 0;
+    try {
+      while (true) {
+        const { items: jobs } = await this.findAll({
+          where: {
+            searchIndex: indexName,
+            deletedAt: {
+              not: {
+                equals: null,
+              },
+            },
+          },
+          take,
+        });
+        jobs.forEach(({ id }: JobDto) => fetchedSet.add(id));
+        const newFetched = fetchedSet.size;
+        if (newFetched === fetched) {
+          // this is a failsafe mechanism, in case something goes wrong with the synchronization, to avoid infinite loops
+          break;
+        }
+        fetched = newFetched;
+        iterations++;
+        attempts += jobs.length;
+        // TODO: create bulk delete method (not one by one as now)
+        await Promise.all(jobs.map((job) => this.tryRemoveFromSearch(job.id)));
+      }
+    } catch (err) {
+      this.logger.error('Bulk Upload job posts to search failed!', {
+        type: 'BULK_DELETE_JOBS_FROM_SEARCH_FAILED',
+        err,
+        iterations,
+        fetched,
+        attempts,
+      });
+      return;
+    }
+    this.logger.info('Bulk deleted jobs from search successfully', {
+      type: 'BULK_DELETE_JOBS_FROM_SEARCH_SUCCESS',
+      iterations,
+      attempts,
+      fetched,
+    });
+  }
+
+  async syncJobsWithSearch(): Promise<void> {
+    await this.uploadJobsToIndex(); // always resolves
+    await this.removeJobsFromIndex(); // always resolves
   }
 
   async setupTasks() {
