@@ -11,6 +11,7 @@ datasource db {
 
 model Job {
   id              Int            @id @default(autoincrement())
+  ownerId         String         @map("owner_id") @db.Uuid
   title           String
   description     String
   salary          Int

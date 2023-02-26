@@ -4,6 +4,7 @@ CREATE TYPE "employment_type" AS ENUM ('FULL_TIME', 'PART_TIME');
 -- CreateTable
 CREATE TABLE "jobs" (
     "id" SERIAL NOT NULL,
+    "owner_id" UUID NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "salary" INTEGER NOT NULL,
