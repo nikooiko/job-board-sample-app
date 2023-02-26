@@ -23,6 +23,8 @@ import { PatchJobDto } from '@app/extra/svc-jobs/dto/patch-job.dto';
 import { ApiAppBadRequestResponse } from '@app/core/error-handling/decorators/api-app-bad-request-response.decorator';
 import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 import { ApiAppNotFoundResponse } from '@app/core/error-handling/decorators/api-app-not-found-response.decorator';
+import { OwnerId } from '@app/extra/ownership/decorators/owner-id.decorator';
+import { OwnerIdGuard } from '@app/extra/ownership/decorators/owner-id-guard.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -35,8 +37,15 @@ export class JobsController {
   })
   @ApiCreatedResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
-  create(@Body() data: CreateJobDto): Promise<JobDto> {
-    return this.jobsService.create(data);
+  @OwnerIdGuard()
+  create(
+    @OwnerId() ownerId: string,
+    @Body() data: CreateJobDto,
+  ): Promise<JobDto> {
+    return this.jobsService.create({
+      ...data,
+      ownerId,
+    });
   }
 
   @Get()
@@ -45,10 +54,15 @@ export class JobsController {
   })
   @ApiOkResponse({ type: JobsListDto })
   @ApiAppBadRequestResponse()
-  findAll(@Query() query: FindAllJobsQueryDto): Promise<JobsListDto> {
+  @OwnerIdGuard()
+  findAll(
+    @OwnerId() ownerId: string,
+    @Query() query: FindAllJobsQueryDto,
+  ): Promise<JobsListDto> {
     return this.jobsService.findAll({
       take: query.limit,
       skip: query.page * query.limit,
+      where: { ownerId },
     });
   }
 
@@ -59,8 +73,12 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiAppNotFoundResponse()
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.jobsService.findOne({ id });
+  @OwnerIdGuard()
+  findOne(
+    @OwnerId() ownerId: string,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<JobDto> {
+    return this.jobsService.findOne({ ownerId, id });
   }
 
   @Patch(':id')
@@ -70,12 +88,14 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiAppNotFoundResponse()
+  @OwnerIdGuard()
   update(
+    @OwnerId() ownerId: string,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PatchJobDto,
   ): Promise<JobDto> {
     return this.jobsService.update({
-      where: { id },
+      where: { ownerId, id },
       data,
     });
   }
@@ -87,7 +107,11 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiAppNotFoundResponse()
-  remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.jobsService.remove({ id });
+  @OwnerIdGuard()
+  remove(
+    @OwnerId() ownerId: string,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<JobDto> {
+    return this.jobsService.remove({ ownerId, id });
   }
 }

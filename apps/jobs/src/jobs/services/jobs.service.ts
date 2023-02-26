@@ -137,7 +137,7 @@ export class JobsService {
         data,
       });
     } catch (err) {
-      const errorResponse = err?.getResponse();
+      const errorResponse = err?.getResponse?.();
       this.logger.error('Failed to index job', {
         type: 'SEARCH_UPLOAD_JOB_FAILED',
         err,
@@ -162,7 +162,7 @@ export class JobsService {
       });
       return false;
     } catch (err) {
-      const errorResponse = err?.getResponse();
+      const errorResponse = err?.getResponse?.();
       if (errorResponse?.status === 404) {
         this.logger.error('Failed to index job', {
           type: 'SEARCH_REMOVE_JOB_NOT_FOUND',
