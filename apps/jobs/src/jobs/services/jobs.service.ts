@@ -8,6 +8,7 @@ import { Logger } from 'winston';
 import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
+import { exclude } from '@app/core/prisma/utils/exclude.util';
 import { TASKS_QUEUE_REPEATABLE_JOBS } from '../constants/tasks-queue-repeatable-jobs';
 import { TASKS_QUEUE } from '../constants/tasks-queue.constant';
 
@@ -34,9 +35,12 @@ export class JobsService {
   }
 
   async create(data: Prisma.JobCreateInput): Promise<JobDto> {
-    const job = await this.prisma.job.create({
-      data,
-    });
+    const job = exclude(
+      await this.prisma.job.create({
+        data,
+      }),
+      ['deletedAt'],
+    );
     this.logger.info('Created job', { type: 'JOB_CREATED', id: job.id, data });
     await this.tryUploadToSearch(job.id, job); // always resolves
     return job;
@@ -57,13 +61,16 @@ export class JobsService {
         skip,
         take,
         cursor,
-        where,
+        where: {
+          ...where,
+          deletedAt: null,
+        },
         orderBy,
       }),
       this.prisma.job.count({ where }),
     ]);
     return {
-      items,
+      items: items.map((item) => exclude(item, ['deletedAt'])),
       limit: take,
       count,
       pages: Math.ceil(count / take),
@@ -71,9 +78,15 @@ export class JobsService {
   }
 
   async findOne(where: Prisma.JobWhereUniqueInput): Promise<JobDto> {
-    return this.prisma.job.findUniqueOrThrow({
-      where,
-    });
+    return exclude(
+      await this.prisma.job.findUniqueOrThrow({
+        where: {
+          ...where,
+          deletedAt: null,
+        },
+      }),
+      ['deletedAt'],
+    );
   }
 
   async update(
@@ -86,10 +99,16 @@ export class JobsService {
     },
     updateSearch = true,
   ): Promise<JobDto> {
-    const job = await this.prisma.job.update({
-      data,
-      where,
-    });
+    const job = exclude(
+      await this.prisma.job.update({
+        data,
+        where: {
+          ...where,
+          deletedAt: null,
+        },
+      }),
+      ['deletedAt'],
+    );
     this.logger.info('Updated job', { type: 'JOB_UPDATED', where, data });
     if (updateSearch) {
       await this.tryUploadToSearch(job.id, job); // always resolves
@@ -98,9 +117,13 @@ export class JobsService {
   }
 
   async remove(where: Prisma.JobWhereUniqueInput): Promise<JobDto> {
-    const job = await this.prisma.job.delete({
-      where,
-    });
+    const job = exclude(
+      await this.prisma.job.update({
+        where: { ...where, deletedAt: null },
+        data: { deletedAt: new Date() },
+      }),
+      ['deletedAt'],
+    );
     await this.tryRemoveFromSearch(job.id); // always resolves
     this.logger.info('Deleted job', { type: 'JOB_DELETED', where });
     return job;
@@ -156,6 +179,10 @@ export class JobsService {
   async tryRemoveFromSearch(id: number): Promise<boolean> {
     try {
       await this.svcSearchService.removeJob(id);
+      await this.prisma.job.update({
+        where: { id },
+        data: { searchIndex: null, searchableSince: null },
+      });
       this.logger.info('Removed job from search index', {
         type: 'SEARCH_REMOVE_JOB_SUCCESS',
         id,
@@ -164,7 +191,7 @@ export class JobsService {
     } catch (err) {
       const errorResponse = err?.getResponse?.();
       if (errorResponse?.status === 404) {
-        this.logger.error('Failed to index job', {
+        this.logger.error('Failed to remove job from index', {
           type: 'SEARCH_REMOVE_JOB_NOT_FOUND',
           err,
           errorResponse,
@@ -173,14 +200,14 @@ export class JobsService {
         // when job is not found, we don't need to retry the operation
         return false;
       }
-      this.logger.error('Failed to index job', {
+      this.logger.error('Failed to remove job from index', {
         type: 'SEARCH_REMOVE_JOB_FAILED',
         err,
         errorResponse,
         id,
       });
+      return true;
     }
-    return true;
   }
 
   async syncJobsWithSearch(): Promise<void> {
