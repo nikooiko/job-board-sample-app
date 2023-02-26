@@ -8,6 +8,7 @@ import { ConfigType } from '@nestjs/config';
 import { wrapSvcRequest } from '@app/core/api/utils/wrap-svc-request.util';
 import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query.dto';
 import svcJobsConfig from '../config/svc-jobs.config';
+import { APP_OWNER_ID_HEADER } from '@app/extra/ownership/constants/app-owner-id-header.constant';
 
 @Injectable()
 export class SvcJobsService {
@@ -21,31 +22,61 @@ export class SvcJobsService {
     this.apiUrl = `${config.rootUrl}/private/api/v1/jobs-svc/jobs`;
   }
 
-  async create(data: CreateJobDto): Promise<JobDto> {
+  async create(ownerId: string, data: CreateJobDto): Promise<JobDto> {
     return wrapSvcRequest<JobDto>(
-      this.httpService.post<JobDto>(this.apiUrl, data),
+      this.httpService.post<JobDto>(this.apiUrl, data, {
+        headers: {
+          [APP_OWNER_ID_HEADER]: ownerId,
+        },
+      }),
     );
   }
 
-  async findAll(query: FindAllJobsQueryDto): Promise<JobsListDto> {
+  async findAll(
+    ownerId: string,
+    query: FindAllJobsQueryDto,
+  ): Promise<JobsListDto> {
     return wrapSvcRequest<JobsListDto>(
-      this.httpService.get<JobsListDto>(this.apiUrl, { params: query }),
+      this.httpService.get<JobsListDto>(this.apiUrl, {
+        params: query,
+        headers: {
+          [APP_OWNER_ID_HEADER]: ownerId,
+        },
+      }),
     );
   }
 
-  async findOne(id: number): Promise<JobDto> {
-    return wrapSvcRequest<JobDto>(this.httpService.get(`${this.apiUrl}/${id}`));
-  }
-
-  async update(id: number, data: PatchJobDto): Promise<JobDto> {
+  async findOne(ownerId: string, id: number): Promise<JobDto> {
     return wrapSvcRequest<JobDto>(
-      this.httpService.patch(`${this.apiUrl}/${id}`, data),
+      this.httpService.get(`${this.apiUrl}/${id}`, {
+        headers: {
+          [APP_OWNER_ID_HEADER]: ownerId,
+        },
+      }),
     );
   }
 
-  async remove(id: number): Promise<JobDto> {
+  async update(
+    ownerId: string,
+    id: number,
+    data: PatchJobDto,
+  ): Promise<JobDto> {
     return wrapSvcRequest<JobDto>(
-      this.httpService.delete(`${this.apiUrl}/${id}`),
+      this.httpService.patch(`${this.apiUrl}/${id}`, data, {
+        headers: {
+          [APP_OWNER_ID_HEADER]: ownerId,
+        },
+      }),
+    );
+  }
+
+  async remove(ownerId: string, id: number): Promise<JobDto> {
+    return wrapSvcRequest<JobDto>(
+      this.httpService.delete(`${this.apiUrl}/${id}`, {
+        headers: {
+          [APP_OWNER_ID_HEADER]: ownerId,
+        },
+      }),
     );
   }
 }

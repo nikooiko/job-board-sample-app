@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsPositive,
   IsString,
+  IsUUID,
   Min,
 } from 'class-validator';
 
@@ -14,6 +15,9 @@ export class JobDto implements Job {
   @IsNumber()
   @Min(0)
   id: number;
+  @ApiProperty()
+  @IsUUID()
+  ownerId: string;
   @ApiProperty()
   @IsString()
   title: string;

@@ -5,6 +5,7 @@ import { IsEnum, IsPositive, IsString } from 'class-validator';
 
 export class CreateJobDto extends OmitType(JobDto, [
   'id',
+  'ownerId',
   'searchIndex',
   'searchableSince',
 ] as const) {
