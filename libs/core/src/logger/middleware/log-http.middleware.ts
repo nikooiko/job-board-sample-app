@@ -26,8 +26,8 @@ export class LogHttp implements NestMiddleware {
         statusCode,
         responseTime: Date.now() - start,
       };
-      ['body', 'query', 'cookies'].forEach(
-        (field: 'body' | 'query' | 'cookies') => {
+      ['body', 'query', 'cookies', 'headers'].forEach(
+        (field: 'body' | 'query' | 'cookies' | 'headers') => {
           const fieldConfig = httpConfig[field];
           const value = req[field];
           if (

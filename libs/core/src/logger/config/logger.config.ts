@@ -55,6 +55,11 @@ export default registerAs(LOGGER_CONFIG_KEY, () => {
         enabled: envToBoolean('LOGGER_HTTP_COOKIES_ENABLED', true),
         maxSize: envToNumber('LOGGER_HTTP_COOKIES_MAX_SIZE', 3 * 1024), // default is 3KB
       },
+      headers: {
+        enabled: envToBoolean('LOGGER_HTTP_HEADERS_ENABLED', true),
+        maxSize: envToNumber('LOGGER_HTTP_HEADERS_MAX_SIZE', 3 * 1024), // default is 3KB
+        blackListedFields: ['cookie'], // this to avoid duplicate logging
+      },
     },
   };
 });
