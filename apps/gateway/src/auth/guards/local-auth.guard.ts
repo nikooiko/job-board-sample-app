@@ -5,7 +5,6 @@ import { AppUnauthorizedException } from '@app/core/error-handling/exceptions/ap
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local') {
   handleRequest(err: Error, user: any) {
-    console.log('###############', user);
     if (err || !user) {
       throw err || new AppUnauthorizedException();
     }

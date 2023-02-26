@@ -26,6 +26,9 @@ import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { SvcSearchService } from '@app/extra/svc-search/services/svc-search.service';
 import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
+import { AuthGuard } from '../../auth/decorators/auth-guard.decorator';
+import { AccessTokenDataDto } from '../../auth/dto/access-token-data.dto';
+import { AuthUser } from '../../auth/decorators/auth-user.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -51,8 +54,12 @@ export class JobsController {
   })
   @ApiCreatedResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
-  create(@Body() data: CreateJobDto): Promise<JobDto> {
-    return this.svcJobsService.create(data);
+  @AuthGuard()
+  create(
+    @AuthUser() user: AccessTokenDataDto,
+    @Body() data: CreateJobDto,
+  ): Promise<JobDto> {
+    return this.svcJobsService.create(user.id, data);
   }
 
   @Get()
@@ -62,8 +69,12 @@ export class JobsController {
   @ApiOkResponse({ type: JobsListDto })
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
-  findAll(@Query() query: FindAllJobsQueryDto): Promise<JobsListDto> {
-    return this.svcJobsService.findAll(query);
+  @AuthGuard()
+  findAll(
+    @AuthUser() user: AccessTokenDataDto,
+    @Query() query: FindAllJobsQueryDto,
+  ): Promise<JobsListDto> {
+    return this.svcJobsService.findAll(user.id, query);
   }
 
   @Get(':id')
@@ -73,8 +84,12 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.svcJobsService.findOne(id);
+  @AuthGuard()
+  findOne(
+    @AuthUser() user: AccessTokenDataDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<JobDto> {
+    return this.svcJobsService.findOne(user.id, id);
   }
 
   @Patch(':id')
@@ -84,11 +99,13 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
+  @AuthGuard()
   update(
+    @AuthUser() user: AccessTokenDataDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() data: PatchJobDto,
   ): Promise<JobDto> {
-    return this.svcJobsService.update(id, data);
+    return this.svcJobsService.update(user.id, id, data);
   }
 
   @Delete(':id')
@@ -98,7 +115,11 @@ export class JobsController {
   @ApiOkResponse({ type: JobDto })
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
-  remove(@Param('id', ParseIntPipe) id: number): Promise<JobDto> {
-    return this.svcJobsService.remove(id);
+  @AuthGuard()
+  remove(
+    @AuthUser() user: AccessTokenDataDto,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<JobDto> {
+    return this.svcJobsService.remove(user.id, id);
   }
 }
