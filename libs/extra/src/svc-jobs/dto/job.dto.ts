@@ -1,16 +1,16 @@
 import { EmploymentType, Job } from '@app/jobs/prisma-client';
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsEnum,
   IsNumber,
-  IsOptional,
   IsPositive,
   IsString,
   IsUUID,
   Min,
 } from 'class-validator';
 
-export class JobDto implements Job {
+export class JobDto implements Omit<Job, 'deletedAt'> {
   @ApiProperty()
   @IsNumber()
   @Min(0)
@@ -30,12 +30,16 @@ export class JobDto implements Job {
   @ApiProperty({ enum: EmploymentType })
   @IsEnum(EmploymentType)
   employmentType: EmploymentType;
-  @ApiProperty({ nullable: true, type: String })
+  @ApiProperty({ nullable: true })
   @IsString()
-  @IsOptional()
   searchIndex: string | null = null;
-  @ApiProperty({ nullable: true, type: String })
-  @IsString()
-  @IsOptional()
+  @ApiProperty({ nullable: true })
+  @IsDate()
   searchableSince: Date | null = null;
+  @ApiProperty()
+  @IsDate()
+  createdAt: Date;
+  @ApiProperty()
+  @IsDate()
+  updatedAt: Date;
 }
