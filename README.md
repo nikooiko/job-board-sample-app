@@ -10,10 +10,11 @@ The system is composed of 4 microservices:
 
 - `gateway` - The gateway service is the entry point of the system. It is responsible for handling the authentication
   and authorization of the users. It also acts as a proxy for the other services.
-- `jobs` - The jobs service is responsible for managing the jobs. It is the only service that can create, update and
-  delete jobs and updates search microservice after any job related operation. Using a task queue (Redis+Bull) it
-  periodically (every 10 minutes) checks for jobs that are not yet uploaded to search service and uploads them and for
-  jobs that are previously soft deleted but not yet removed from search index.
+- `jobs` - The jobs service is responsible for managing the job posts. It is the only service that can create, update
+  and
+  delete jobs and update search microservice after any job related operation. Using a task queue (Redis+Bull) it
+  periodically (every 10 minutes) uploads jobs that are not yet uploaded to search service and removes
+  soft deleted jobs that are not yet removed from search service.
 - `search` - The search service is responsible for indexing and searching jobs. It is used by the `jobs` service to
   update the index and by the `gateway` service to search for jobs.
 - `users` - The users service is responsible for managing the users. It is the only service that can create a user,
