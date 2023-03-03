@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -12,6 +12,7 @@ import { UserDto } from '@app/extra/svc-users/dto/user.dto';
 import { CreateUserDto } from '@app/extra/svc-users/dto/create-user.dto';
 import { UserCredentialsDto } from '@app/extra/svc-users/dto/user-credentials.dto';
 import { ApiAppUnauthorizedResponse } from '@app/core/error-handling/decorators/api-app-unauthorized-response.decorator';
+import { UUIDParam } from '@app/core/api/decorators/uuid-param.decorator';
 
 @ApiTags('Users')
 @Controller('users')
@@ -34,7 +35,7 @@ export class UsersController {
   })
   @ApiOkResponse({ type: UserDto })
   @ApiAppNotFoundResponse()
-  findOne(@Param('id') id: string): Promise<UserDto> {
+  findOne(@UUIDParam() id: string): Promise<UserDto> {
     return this.usersService.findOne({ id });
   }
 
