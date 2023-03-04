@@ -5,9 +5,11 @@ import { User } from '@app/users/prisma-client';
 import request from 'supertest';
 import { UsersPrismaService } from '../users-prisma/services/users-prisma.service';
 import { UsersModule } from './users.module';
+import { UsersService } from './services/users.service';
 
 describe('Users (e2e)', () => {
   let app: INestApplication;
+  let usersService: UsersService;
   let prisma: UsersPrismaService;
   const validUserData = {
     email: 'users-e2e@email-test.com',
@@ -24,10 +26,14 @@ describe('Users (e2e)', () => {
     await app.init();
 
     prisma = moduleFixture.get<UsersPrismaService>(UsersPrismaService);
+    usersService = moduleFixture.get<UsersService>(UsersService);
   });
-  beforeAll(async () => {
+  beforeEach(async () => {
     createdUser = await prisma.user.create({
-      data: validUserData,
+      data: {
+        ...validUserData,
+        password: await usersService.hashPassword(validUserData.password),
+      },
     });
   });
 
@@ -117,8 +123,75 @@ describe('Users (e2e)', () => {
       });
     });
   });
+  describe('POST /validate-credentials', () => {
+    const createRequest = (data: any) => {
+      const agent = request.agent(app.getHttpServer());
+      return agent.post('/users/validate-credentials').send(data);
+    };
+    it('should return validation error with email', async () => {
+      const data = {
+        email: 'invalid-email',
+        password: validUserData.password,
+      };
+      const res = await createRequest(data);
+      expect(res.status).toEqual(400);
+      expect(res.body).toEqual({
+        message: [
+          {
+            property: 'email',
+            value: data.email,
+            constraints: {
+              isEmail: 'email must be an email',
+            },
+          },
+        ],
+        error: 'app_validation_error',
+        statusCode: 400,
+      });
+    });
+    it('should return 401 when user not found', async () => {
+      const data = {
+        email: 'users-e2e-2@email-test.com',
+        password: validUserData.password,
+      };
+      const res = await createRequest(data);
+      expect(res.status).toEqual(401);
+      expect(res.body).toEqual({
+        message: 'Invalid credentials',
+        error: 'unauthorized',
+        statusCode: 401,
+      });
+    });
+    it('should return 401 when invalid password', async () => {
+      const data = {
+        email: validUserData.email,
+        password: validUserData.password + '-mismatch',
+      };
+      const res = await createRequest(data);
+      expect(res.status).toEqual(401);
+      expect(res.body).toEqual({
+        message: 'Invalid credentials',
+        error: 'unauthorized',
+        statusCode: 401,
+      });
+    });
+    it('should return 200 with valid credentials', async () => {
+      const data = {
+        email: validUserData.email,
+        password: validUserData.password,
+      };
+      const res = await createRequest(data);
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({
+        id: createdUser.id,
+        email: createdUser.email,
+        createdAt: createdUser.createdAt.toISOString(),
+        updatedAt: createdUser.updatedAt.toISOString(),
+      });
+    });
+  });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await prisma.user.deleteMany();
     await app.close();
   });

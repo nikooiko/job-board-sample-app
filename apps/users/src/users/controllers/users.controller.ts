@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import {
   ApiCreatedResponse,
   ApiOkResponse,
@@ -30,6 +37,7 @@ export class UsersController {
   }
 
   @Post('validate-credentials')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: "Validates user's credentials",
   })
