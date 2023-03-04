@@ -11,7 +11,10 @@ export class HasOwnerIdGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
     const ownerId = req.headers[APP_OWNER_ID_HEADER];
     if (!ownerId || typeof ownerId !== 'string') {
-      throw new AppForbiddenException();
+      throw new AppForbiddenException(
+        'Owner ID is required',
+        'owner_id_required',
+      );
     }
     req.ownerId = ownerId;
     return true;
