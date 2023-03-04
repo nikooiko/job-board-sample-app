@@ -29,16 +29,6 @@ export class UsersController {
     return this.usersService.create(data);
   }
 
-  @Get(':id')
-  @ApiOperation({
-    summary: 'Returns the corresponding user',
-  })
-  @ApiOkResponse({ type: UserDto })
-  @ApiAppNotFoundResponse()
-  findOne(@UUIDParam() id: string): Promise<UserDto> {
-    return this.usersService.findOne({ id });
-  }
-
   @Post('validate-credentials')
   @ApiOperation({
     summary: "Validates user's credentials",
@@ -48,5 +38,15 @@ export class UsersController {
   @ApiAppBadRequestResponse()
   validateCredentials(@Body() data: UserCredentialsDto): Promise<UserDto> {
     return this.usersService.validateCredentials(data);
+  }
+
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Returns the corresponding user',
+  })
+  @ApiOkResponse({ type: UserDto })
+  @ApiAppNotFoundResponse()
+  findOne(@UUIDParam() id: string): Promise<UserDto> {
+    return this.usersService.findOne({ id });
   }
 }
