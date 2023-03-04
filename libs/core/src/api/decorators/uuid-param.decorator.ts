@@ -1,12 +1,12 @@
 import { Param, ParseUUIDPipe } from '@nestjs/common';
 import { AppBadRequestException } from '../../error-handling/exceptions/app-bad-request.exception';
 
-export function UUIDParam(paramName = 'id'): ParameterDecorator {
+export function UUIDParam(prop = 'id'): ParameterDecorator {
   return Param(
-    'id',
+    prop,
     new ParseUUIDPipe({
       exceptionFactory: () =>
-        new AppBadRequestException(`Invalid '${paramName}' param`),
+        new AppBadRequestException(`Param '${prop}' must be a UUID`),
     }),
   );
 }

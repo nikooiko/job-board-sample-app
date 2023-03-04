@@ -37,7 +37,7 @@ describe('Users (e2e)', () => {
     });
   });
 
-  describe('POST /', () => {
+  describe('POST /users', () => {
     const createRequest = (data: any) => {
       const agent = request.agent(app.getHttpServer());
       return agent.post('/users').send(data);
@@ -123,7 +123,7 @@ describe('Users (e2e)', () => {
       });
     });
   });
-  describe('POST /validate-credentials', () => {
+  describe('POST /users/validate-credentials', () => {
     const createRequest = (data: any) => {
       const agent = request.agent(app.getHttpServer());
       return agent.post('/users/validate-credentials').send(data);
@@ -190,9 +190,46 @@ describe('Users (e2e)', () => {
       });
     });
   });
+  describe('GET /users/:id', () => {
+    const createRequest = (id: any) => {
+      const agent = request.agent(app.getHttpServer());
+      return agent.get(`/users/${id}`);
+    };
+    it('should return validation error with invalid id', async () => {
+      const id = 'invalid-id';
+      const res = await createRequest(id);
+      expect(res.status).toEqual(400);
+      expect(res.body).toEqual({
+        message: "Param 'id' must be a UUID",
+        error: 'bad_request',
+        statusCode: 400,
+      });
+    });
+    it('should return 404 when user not found', async () => {
+      const res = await createRequest('00000000-0000-0000-0000-00000000FFFF');
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 200 with valid credentials', async () => {
+      const res = await createRequest(createdUser.id);
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({
+        id: createdUser.id,
+        email: createdUser.email,
+        createdAt: createdUser.createdAt.toISOString(),
+        updatedAt: createdUser.updatedAt.toISOString(),
+      });
+    });
+  });
 
   afterEach(async () => {
     await prisma.user.deleteMany();
-    await app.close();
+  });
+  afterAll(() => {
+    return app.close();
   });
 });
