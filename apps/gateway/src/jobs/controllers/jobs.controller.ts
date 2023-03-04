@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -29,6 +27,7 @@ import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dt
 import { AuthGuard } from '../../auth/decorators/auth-guard.decorator';
 import { AccessTokenDataDto } from '../../auth/dto/access-token-data.dto';
 import { AuthUser } from '../../auth/decorators/auth-user.decorator';
+import { IntParam } from '@app/core/api/decorators/int-param.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -87,7 +86,7 @@ export class JobsController {
   @AuthGuard()
   findOne(
     @AuthUser() user: AccessTokenDataDto,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
   ): Promise<JobDto> {
     return this.svcJobsService.findOne(user.id, id);
   }
@@ -102,7 +101,7 @@ export class JobsController {
   @AuthGuard()
   update(
     @AuthUser() user: AccessTokenDataDto,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
     @Body() data: PatchJobDto,
   ): Promise<JobDto> {
     return this.svcJobsService.update(user.id, id, data);
@@ -118,7 +117,7 @@ export class JobsController {
   @AuthGuard()
   remove(
     @AuthUser() user: AccessTokenDataDto,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
   ): Promise<JobDto> {
     return this.svcJobsService.remove(user.id, id);
   }

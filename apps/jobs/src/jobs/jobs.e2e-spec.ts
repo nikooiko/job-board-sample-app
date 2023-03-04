@@ -102,6 +102,64 @@ describe('Jobs (e2e)', () => {
       });
     });
   });
+  describe('GET /jobs/:id', () => {
+    const createRequest = (id: any, ownerId?: string) => {
+      const agent = request.agent(app.getHttpServer());
+      const req = agent.get(`/jobs/${id}`);
+      if (ownerId) {
+        requestWithOwnerIdHeader(req, ownerId);
+      }
+      return req;
+    };
+    ownerIdGuardTestCases(() => createRequest(1));
+    it('should return 400 with invalid id', async () => {
+      const id = 'abc';
+      const res = await createRequest(id, validJobData.ownerId);
+      expect(res.status).toEqual(400);
+      expect(res.body).toEqual({
+        message: "Param 'id' must be an integer",
+        error: 'bad_request',
+        statusCode: 400,
+      });
+    });
+    it('should return 404 when job not found', async () => {
+      const res = await createRequest(999999, validJobData.ownerId);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 404 when job is owned by another user', async () => {
+      const res = await createRequest(
+        createdJob.id,
+        '00000000-0000-0000-0000-00000000fff0',
+      );
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 200', async () => {
+      const res = await createRequest(createdJob.id, validJobData.ownerId);
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({
+        id: createdJob.id,
+        ownerId: createdJob.ownerId,
+        title: createdJob.title,
+        description: createdJob.description,
+        salary: createdJob.salary,
+        employmentType: createdJob.employmentType,
+        searchIndex: null,
+        searchableSince: null,
+        createdAt: createdJob.createdAt.toISOString(),
+        updatedAt: createdJob.updatedAt.toISOString(),
+      });
+    });
+  });
 
   afterEach(async () => {
     await prisma.job.deleteMany();

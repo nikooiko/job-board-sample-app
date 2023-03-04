@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
-  ParseIntPipe,
   Patch,
   Post,
   Query,
@@ -25,6 +23,7 @@ import { FindAllJobsQueryDto } from '@app/extra/svc-jobs/dto/find-all-jobs-query
 import { ApiAppNotFoundResponse } from '@app/core/error-handling/decorators/api-app-not-found-response.decorator';
 import { OwnerId } from '@app/extra/ownership/decorators/owner-id.decorator';
 import { OwnerIdGuard } from '@app/extra/ownership/decorators/owner-id-guard.decorator';
+import { IntParam } from '@app/core/api/decorators/int-param.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -76,7 +75,7 @@ export class JobsController {
   @OwnerIdGuard()
   findOne(
     @OwnerId() ownerId: string,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
   ): Promise<JobDto> {
     return this.jobsService.findOne({ ownerId, id });
   }
@@ -91,7 +90,7 @@ export class JobsController {
   @OwnerIdGuard()
   update(
     @OwnerId() ownerId: string,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
     @Body() data: PatchJobDto,
   ): Promise<JobDto> {
     return this.jobsService.update({
@@ -110,7 +109,7 @@ export class JobsController {
   @OwnerIdGuard()
   remove(
     @OwnerId() ownerId: string,
-    @Param('id', ParseIntPipe) id: number,
+    @IntParam('id') id: number,
   ): Promise<JobDto> {
     return this.jobsService.remove({ ownerId, id });
   }

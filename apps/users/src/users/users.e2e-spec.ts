@@ -214,7 +214,7 @@ describe('Users (e2e)', () => {
         statusCode: 404,
       });
     });
-    it('should return 200 with valid credentials', async () => {
+    it('should return 200', async () => {
       const res = await createRequest(createdUser.id);
       expect(res.status).toEqual(200);
       expect(res.body).toEqual({
