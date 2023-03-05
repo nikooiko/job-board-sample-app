@@ -1,40 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CoreModule } from '@app/core/core.module';
 import { INestApplication } from '@nestjs/common';
-import { EmploymentType, Job, Prisma } from '@app/jobs/prisma-client';
+import { Job } from '@app/jobs/prisma-client';
 import request from 'supertest';
-import crypto from 'node:crypto';
 import { ownerIdGuardTestCases } from '@app/testing/owner-id/owner-id-guard-test-cases';
 import { requestWithOwnerIdHeader } from '@app/testing/owner-id/request-with-owner-id-header';
+import { jobGenerator } from '@app/testing/jobs/utils/job-generator.util';
 import { JobsPrismaService } from '../jobs-prisma/services/jobs-prisma.service';
 import { JobsModule } from './jobs.module';
-
-function jobGenerator(data: Partial<Prisma.JobCreateInput> = {}, idx?: number) {
-  const random = idx ?? Math.floor(Math.random() * 10000) + 1;
-  return {
-    title: `Title:${random}`,
-    description: `Description:${random}`,
-    salary: random,
-    ownerId: crypto.randomUUID(),
-    employmentType: EmploymentType.FULL_TIME,
-    ...data,
-  };
-}
-
-function jobResponseMap(job: Job) {
-  return {
-    id: job.id,
-    title: job.title,
-    description: job.description,
-    salary: job.salary,
-    employmentType: job.employmentType,
-    ownerId: job.ownerId,
-    createdAt: job.createdAt.toISOString(),
-    updatedAt: job.updatedAt.toISOString(),
-    searchIndex: job.searchIndex,
-    searchableSince: job.searchableSince?.toISOString() ?? null,
-  };
-}
+import { jobResponseMap } from '@app/testing/jobs/utils/job-response-map.util';
 
 describe('Jobs (e2e)', () => {
   let app: INestApplication;
@@ -294,18 +268,67 @@ describe('Jobs (e2e)', () => {
         owner1DBJobs[0].ownerId,
       );
       expect(res.status).toEqual(200);
+      expect(res.body).toEqual(owner1HTTPJobs[0]);
+    });
+  });
+  describe('DELETE /jobs/:id', () => {
+    const createRequest = (
+      id: any,
+      ownerId?: string,
+      method: 'get' | 'delete' = 'delete',
+    ) => {
+      const agent = request.agent(app.getHttpServer());
+      const req = agent[method](`/jobs/${id}`);
+      if (ownerId) {
+        requestWithOwnerIdHeader(req, ownerId);
+      }
+      return req;
+    };
+    const expectToFindJob = async (job: Job, found = true) => {
+      const res = await createRequest(job.id, job.ownerId, 'get');
+      expect(res.status).toEqual(found ? 200 : 404);
+    };
+    ownerIdGuardTestCases(() => createRequest(1));
+    it('should return 400 with invalid id', async () => {
+      const id = 'abc';
+      const res = await createRequest(id, owner1DBJobs[0].ownerId);
+      expect(res.status).toEqual(400);
       expect(res.body).toEqual({
-        id: owner1DBJobs[0].id,
-        ownerId: owner1DBJobs[0].ownerId,
-        title: owner1DBJobs[0].title,
-        description: owner1DBJobs[0].description,
-        salary: owner1DBJobs[0].salary,
-        employmentType: owner1DBJobs[0].employmentType,
-        searchIndex: null,
-        searchableSince: null,
-        createdAt: owner1DBJobs[0].createdAt.toISOString(),
-        updatedAt: owner1DBJobs[0].updatedAt.toISOString(),
+        message: "Param 'id' must be an integer",
+        error: 'bad_request',
+        statusCode: 400,
       });
+    });
+    it('should return 404 when job not found', async () => {
+      const res = await createRequest(999999, owner1DBJobs[0].ownerId);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 404 when job is owned by another user', async () => {
+      const res = await createRequest(owner1DBJobs[0].id, owner2Id);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 200', async () => {
+      await expectToFindJob(owner1DBJobs[0], true);
+      const res = await createRequest(
+        owner1DBJobs[0].id,
+        owner1DBJobs[0].ownerId,
+      );
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({
+        ...owner1HTTPJobs[0],
+        updatedAt: expect.any(String), // updatedAt is changed due to soft delete
+      });
+      await expectToFindJob(owner1DBJobs[0], false);
     });
   });
 
