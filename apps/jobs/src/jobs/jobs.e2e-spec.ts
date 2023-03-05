@@ -294,18 +294,67 @@ describe('Jobs (e2e)', () => {
         owner1DBJobs[0].ownerId,
       );
       expect(res.status).toEqual(200);
+      expect(res.body).toEqual(owner1HTTPJobs[0]);
+    });
+  });
+  describe('DELETE /jobs/:id', () => {
+    const createRequest = (
+      id: any,
+      ownerId?: string,
+      method: 'get' | 'delete' = 'delete',
+    ) => {
+      const agent = request.agent(app.getHttpServer());
+      const req = agent[method](`/jobs/${id}`);
+      if (ownerId) {
+        requestWithOwnerIdHeader(req, ownerId);
+      }
+      return req;
+    };
+    const expectToFindJob = async (job: Job, found = true) => {
+      const res = await createRequest(job.id, job.ownerId, 'get');
+      expect(res.status).toEqual(found ? 200 : 404);
+    };
+    ownerIdGuardTestCases(() => createRequest(1));
+    it('should return 400 with invalid id', async () => {
+      const id = 'abc';
+      const res = await createRequest(id, owner1DBJobs[0].ownerId);
+      expect(res.status).toEqual(400);
       expect(res.body).toEqual({
-        id: owner1DBJobs[0].id,
-        ownerId: owner1DBJobs[0].ownerId,
-        title: owner1DBJobs[0].title,
-        description: owner1DBJobs[0].description,
-        salary: owner1DBJobs[0].salary,
-        employmentType: owner1DBJobs[0].employmentType,
-        searchIndex: null,
-        searchableSince: null,
-        createdAt: owner1DBJobs[0].createdAt.toISOString(),
-        updatedAt: owner1DBJobs[0].updatedAt.toISOString(),
+        message: "Param 'id' must be an integer",
+        error: 'bad_request',
+        statusCode: 400,
       });
+    });
+    it('should return 404 when job not found', async () => {
+      const res = await createRequest(999999, owner1DBJobs[0].ownerId);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 404 when job is owned by another user', async () => {
+      const res = await createRequest(owner1DBJobs[0].id, owner2Id);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 200', async () => {
+      await expectToFindJob(owner1DBJobs[0], true);
+      const res = await createRequest(
+        owner1DBJobs[0].id,
+        owner1DBJobs[0].ownerId,
+      );
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({
+        ...owner1HTTPJobs[0],
+        updatedAt: expect.any(String), // updatedAt is changed due to soft delete
+      });
+      await expectToFindJob(owner1DBJobs[0], false);
     });
   });
 
