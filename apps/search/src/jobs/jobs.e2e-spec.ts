@@ -169,6 +169,45 @@ describe('Jobs (e2e)', () => {
       });
     });
   });
+  describe('DELETE /jobs/:id', () => {
+    const createRequest = (id: any) => {
+      const agent = request.agent(app.getHttpServer());
+      return agent.delete(`/jobs/${id}`);
+    };
+    const expectToFindJob = async (id: any, found = true) => {
+      expect(
+        await esService.exists({
+          index: jobsIndex.index,
+          id,
+        }),
+      ).toEqual(found);
+    };
+    it('should return 400 with invalid id', async () => {
+      const id = 'abc';
+      const res = await createRequest(id);
+      expect(res.status).toEqual(400);
+      expect(res.body).toEqual({
+        message: "Param 'id' must be an integer",
+        error: 'bad_request',
+        statusCode: 400,
+      });
+    });
+    it('should return 404 when job not found', async () => {
+      const res = await createRequest(999999);
+      expect(res.status).toEqual(404);
+      expect(res.body).toEqual({
+        message: 'Not Found',
+        error: 'not_found',
+        statusCode: 404,
+      });
+    });
+    it('should return 200', async () => {
+      await expectToFindJob(jobData[0].id, true);
+      const res = await createRequest(jobData[0].id);
+      expect(res.status).toEqual(204);
+      await expectToFindJob(jobData[0].id, false);
+    });
+  });
 
   afterAll(async () => {
     await esService.indices.delete({

@@ -3,8 +3,8 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
-  ParseIntPipe,
+  HttpCode,
+  HttpStatus,
   Post,
   Query,
 } from '@nestjs/common';
@@ -24,6 +24,7 @@ import { jobsIndex } from '../indices/jobs.index';
 import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
 import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
 import { IndexResponseDto } from '@app/extra/svc-search/dto/index-response.dto';
+import { IntParam } from '@app/core/api/decorators/int-param.decorator';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -64,13 +65,14 @@ export class JobsController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Deletes the corresponding job',
   })
   @ApiNoContentResponse()
   @ApiAppBadRequestResponse()
   @ApiNotFoundResponse()
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
+  remove(@IntParam('id') id: number): Promise<void> {
     return this.jobsService.remove(id);
   }
 }
