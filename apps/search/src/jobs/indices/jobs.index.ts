@@ -10,6 +10,8 @@ export const jobsIndex: IndicesCreateRequest = {
       salary: { type: 'integer' },
       employment_type: { type: 'keyword' },
       searchable_since: { type: 'date' },
+      created_at: { type: 'date' },
+      updated_at: { type: 'date' },
     },
   },
 };

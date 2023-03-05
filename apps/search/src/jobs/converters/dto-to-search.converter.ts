@@ -10,5 +10,7 @@ export const dtoToSearchConverter = (doc: JobDto): SearchJobDoc => {
     salary: doc.salary,
     employment_type: doc.employmentType,
     searchable_since: doc.searchableSince,
+    created_at: doc.createdAt,
+    updated_at: doc.updatedAt,
   };
 };
