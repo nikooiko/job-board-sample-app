@@ -222,7 +222,7 @@ export class JobsService {
   async uploadJobsToIndex(): Promise<void> {
     const take = JobsService.PARALLEL_UPLOAD_LIMIT;
     const fetchedSet = new Set();
-    const indexName = await this.svcSearchService.indexName();
+    const indexDef = await this.svcSearchService.getIndexDef();
     let attempts = 0;
     let fetched = 0;
     let iterations = 0;
@@ -234,7 +234,7 @@ export class JobsService {
               {
                 searchIndex: {
                   not: {
-                    equals: indexName,
+                    equals: indexDef.index,
                   },
                 },
               },
@@ -285,7 +285,7 @@ export class JobsService {
   async removeJobsFromIndex(): Promise<void> {
     const take = JobsService.PARALLEL_DELETE_LIMIT;
     const fetchedSet = new Set();
-    const indexName = await this.svcSearchService.indexName();
+    const indexDef = await this.svcSearchService.getIndexDef();
     let attempts = 0;
     let fetched = 0;
     let iterations = 0;
@@ -293,7 +293,7 @@ export class JobsService {
       while (true) {
         const { items: jobs } = await this.findAll({
           where: {
-            searchIndex: indexName,
+            searchIndex: indexDef.index,
             deletedAt: {
               not: {
                 equals: null,

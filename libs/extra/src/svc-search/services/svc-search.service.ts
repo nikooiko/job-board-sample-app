@@ -6,6 +6,7 @@ import { wrapSvcRequest } from '@app/core/api/utils/wrap-svc-request.util';
 import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.dto';
 import { JobDto } from '@app/extra/svc-jobs/dto/job.dto';
 import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
+import { IndexResponseDto } from '@app/extra/svc-search/dto/index-response.dto';
 
 @Injectable()
 export class SvcSearchService {
@@ -19,8 +20,8 @@ export class SvcSearchService {
     this.jobsUrl = `${config.rootUrl}/private/api/v1/search-svc/jobs`;
   }
 
-  async indexName() {
-    return wrapSvcRequest<string>(
+  async getIndexDef() {
+    return wrapSvcRequest<IndexResponseDto>(
       this.httpService.get(`${this.jobsUrl}/index`),
     );
   }

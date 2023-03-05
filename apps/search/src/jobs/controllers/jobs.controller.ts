@@ -23,6 +23,7 @@ import { SearchJobsQueryDto } from '@app/extra/svc-search/dto/search-jobs-query.
 import { jobsIndex } from '../indices/jobs.index';
 import { UpsertJobResponseDto } from '@app/extra/svc-search/dto/upsert-job-response.dto';
 import { SearchJobsListDto } from '@app/extra/svc-search/dto/search-jobs-list.dto';
+import { IndexResponseDto } from '@app/extra/svc-search/dto/index-response.dto';
 
 @ApiTags('Jobs')
 @Controller('jobs')
@@ -33,9 +34,13 @@ export class JobsController {
   @ApiOperation({
     summary: 'Returns the name of the active job index',
   })
-  @ApiOkResponse()
-  async getIndexName(): Promise<string> {
-    return jobsIndex.index;
+  @ApiOkResponse({
+    type: IndexResponseDto,
+  })
+  async getIndexName(): Promise<IndexResponseDto> {
+    return {
+      index: jobsIndex.index,
+    };
   }
 
   @Post()
